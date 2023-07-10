@@ -1,15 +1,16 @@
 // In the format of: 'hostname': 'selector'
+	// Add more wiki farms as needed
 const WIKI_FARMS = {
 	'miraheze.org': 'static.miraheze.org',
 	'wikiforge.net': 'static.wikiforge.net',
-	// Add more wiki farms here as needed
 };
 
 // In the format of: skinname: 'selector'
+// Add more skin selectors as needed
 const SKIN_SELECTORS = {
 	cosmos: '#p-tb ul',
 	minerva: 'ul#p-personal',
-	// Add more skin selectors here as needed
+	default: '#p-personal ul',
 };
 
 const cache = {};
@@ -72,7 +73,7 @@ function checkHtmlHead() {
 		const skin = document.body.className.match(/skin-([a-z]+)/);
 		const skinName = skin ? skin[1] : '';
 
-		const skinSelector = SKIN_SELECTORS[skinName] || '#p-personal ul';
+		const skinSelector = SKIN_SELECTORS[skinName] || SKIN_SELECTORS['default'];
 
 		const targetElement = document.querySelector(skinSelector);
 		if (!targetElement) {
