@@ -26,8 +26,8 @@ function parseHttpHeaders(httpHeaders) {
 
 const cache = {};
 
-// Two minutes
-const cacheDuration = 120000;
+// 5 minutes
+const cacheDuration = 300000;
 
 function checkHtmlBody() {
 	if (document.body.innerHTML.includes("wikiforge")) {
