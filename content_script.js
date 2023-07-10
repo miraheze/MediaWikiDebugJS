@@ -43,9 +43,13 @@ function checkHtmlBody() {
 			const skinName = skin ? skin[1] : '';
 
 			if (skinName === 'cosmos') {
-				$('<li>').html(info).appendTo('#p-tb ul');
+				var liInfoElement = document.createElement('li');
+				liInfoElement.innerHTML = info;
+				document.querySelector('#p-tb ul').appendChild(liInfoElement);
 			} else {
-				$('<li>').html(info).prependTo('#p-personal ul');
+				var liInfoElement = document.createElement('li');
+				liInfoElement.innerHTML = info;
+				document.querySelector('#p-personal ul').appendChild(liInfoElement);
 			}
 
 			const apiUrl = '/w/api.php';
@@ -65,9 +69,13 @@ function checkHtmlBody() {
 						caption = 'Queued Jobs: ' + jobs;
 
 					if (skinName === 'cosmos') {
-						$('<li>').html(caption).appendTo('#p-tb ul');
+						var liJobsElement = document.createElement('li');
+						liJobsElement.innerHTML = caption;
+						document.querySelector('#p-tb ul').appendChild(liJobsElement);
 					} else {
-						$('<li>').html(caption).prependTo('#p-personal ul');
+						var liJobsElement = document.createElement('li');
+						liJobsElement.innerHTML = caption;
+						document.querySelector('#p-personal ul').appendChild(liJobsElement);
 					}
 				});
 		};
