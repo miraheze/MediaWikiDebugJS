@@ -7,3 +7,4 @@ function checkHtmlBody() {
 }
 
 document.addEventListener('DOMContentLoaded', checkHtmlBody);
+checkHtmlBody();
