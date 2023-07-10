@@ -51,6 +51,10 @@ function checkHtmlBody() {
 				const liInfoElement = document.createElement('li');
 				liInfoElement.innerHTML = info;
 				document.querySelector('#p-tb ul').appendChild(liInfoElement);
+			} else if (skinName === 'minerva') {
+				const liInfoElement = document.createElement('li');
+				liInfoElement.innerHTML = info;
+				document.querySelector('ul#p-personal').appendChild(liInfoElement);
 			} else {
 				const liInfoElement = document.createElement('li');
 				liInfoElement.innerHTML = info;
@@ -99,6 +103,10 @@ function handleApiResponse(data) {
 		const liJobsElement = document.createElement('li');
 		liJobsElement.innerHTML = caption;
 		document.querySelector('#p-tb ul').appendChild(liJobsElement);
+	}  else if (skinName === 'minerva') {
+		const liJobsElement = document.createElement('li');
+		liJobsElement.innerHTML = caption;
+		document.querySelector('ul#p-personal').appendChild(liJobsElement);
 	} else {
 		const liJobsElement = document.createElement('li');
 		liJobsElement.innerHTML = caption;
