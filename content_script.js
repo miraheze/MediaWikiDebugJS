@@ -74,19 +74,15 @@ function checkHtmlBody() {
 
 		const skinSelector = SKIN_SELECTORS[skinName] || '#p-personal ul';
 
-		const liInfoElement = document.createElement('li');
-		liInfoElement.innerHTML = info;
-
-		const liJobsElement = document.createElement('li');
-		liJobsElement.innerHTML = 'Queued Jobs:';
-
 		const targetElement = document.querySelector(skinSelector);
 		if (!targetElement) {
 			return; // No matching target element found for the skin selector
 		}
 
+		const liInfoElement = document.createElement('li');
+		liInfoElement.innerHTML = info;
+
 		targetElement.appendChild(liInfoElement);
-		targetElement.appendChild(liJobsElement);
 
 		const apiUrl = '/w/api.php';
 		const params = {
