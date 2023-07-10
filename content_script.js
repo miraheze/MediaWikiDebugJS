@@ -1,3 +1,14 @@
+function parseHttpHeaders(httpHeaders) {
+	return httpHeaders.split("\n").map(function (x) {
+		return x.split(/: */, 2);
+	}).filter(function (x) {
+		return x[0];
+	}).reduce(function (ac, x) {
+		ac[x[0]] = x[1];
+		return ac;
+	}, {});
+}
+
 function checkHtmlBody() {
 	if (document.body.innerHTML.includes("wikiforge")) {
 		const xhr = new XMLHttpRequest();
