@@ -2,8 +2,8 @@
 // from the script source because Chrome extension content scripts do not share
 // an execution environment with other JavaScript code.
 function getMediaWikiVariable(variable) {
-	const nodes = document.querySelectorAll('script'),
-		i, match;
+	const nodes = document.querySelectorAll('script');
+	var i, match;
 
 	for (i = 0; i < nodes.length; i++) {
 		match = new RegExp('"' + variable + '":\\s*"?([^("|}|,)]+)"?').exec(nodes[i].innerText);
