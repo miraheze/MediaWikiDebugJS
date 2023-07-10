@@ -53,5 +53,6 @@ function checkHtmlBody() {
 	}
 }
 
-document.addEventListener('DOMContentLoaded', checkHtmlBody);
-checkHtmlBody();
+window.onload = function() {
+	checkHtmlBody();
+};
