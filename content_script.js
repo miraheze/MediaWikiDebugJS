@@ -1,6 +1,6 @@
 // In the format of: 'hostname': 'selector'
 const WIKI_FARMS = {
-	// Covers both WikiForge and WikiTide
+	'miraheze.org': 'static.miraheze.org',
 	'wikiforge.net': 'static.wikiforge.net',
 	// Add more wiki farms here as needed
 };
