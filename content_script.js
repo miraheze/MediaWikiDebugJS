@@ -72,28 +72,21 @@ function checkHtmlBody() {
 		const skin = document.body.className.match(/skin-([a-z]+)/);
 		const skinName = skin ? skin[1] : '';
 
-		const matchingSkinSelectors = matchingWikiFarms.reduce((selectors, [domain, selector]) => {
-			const wikiFarmSelector = selector ? `.${selector}` : '';
-			const skinSelector = SKIN_SELECTORS[skinName + wikiFarmSelector];
-			if (skinSelector) {
-				selectors.push(skinSelector);
-			}
-			return selectors;
-		}, []);
-
-		if (matchingSkinSelectors.length === 0) {
-			return; // No matching skin selectors found for the wiki farms
-		}
+		const skinSelector = SKIN_SELECTORS[skinName] || '#p-personal ul';
 
 		const liInfoElement = document.createElement('li');
 		liInfoElement.innerHTML = info;
 
-		matchingSkinSelectors.forEach((skinSelector) => {
-			const targetElement = document.querySelector(skinSelector);
-			if (targetElement) {
-				targetElement.appendChild(liInfoElement.cloneNode(true));
-			}
-		});
+		const liJobsElement = document.createElement('li');
+		liJobsElement.innerHTML = 'Queued Jobs:';
+
+		const targetElement = document.querySelector(skinSelector);
+		if (!targetElement) {
+			return; // No matching target element found for the skin selector
+		}
+
+		targetElement.appendChild(liInfoElement);
+		targetElement.appendChild(liJobsElement);
 
 		const apiUrl = '/w/api.php';
 		const params = {
@@ -104,7 +97,7 @@ function checkHtmlBody() {
 		};
 
 		if (cache.hasOwnProperty(apiUrl) && (Date.now() - cache[apiUrl].timestamp) < cacheDuration) {
-			handleApiResponse(cache[apiUrl].data, matchingSkinSelectors);
+			handleApiResponse(cache[apiUrl].data, targetElement);
 		} else {
 			fetch(apiUrl + '?' + new URLSearchParams(params))
 				.then(function (response) {
@@ -116,25 +109,20 @@ function checkHtmlBody() {
 						timestamp: Date.now(),
 					};
 
-					handleApiResponse(data, matchingSkinSelectors);
+					handleApiResponse(data, targetElement);
 				});
 		}
 	};
 }
 
-function handleApiResponse(data, matchingSkinSelectors) {
+function handleApiResponse(data, targetElement) {
 	const jobs = data.query.statistics.jobs;
 	const caption = 'Queued Jobs: ' + jobs;
 
 	const liJobsElement = document.createElement('li');
 	liJobsElement.innerHTML = caption;
 
-	matchingSkinSelectors.forEach((skinSelector) => {
-		const targetElement = document.querySelector(skinSelector);
-		if (targetElement) {
-			targetElement.appendChild(liJobsElement.cloneNode(true));
-		}
-	});
+	targetElement.appendChild(liJobsElement);
 }
 
 checkHtmlBody();
