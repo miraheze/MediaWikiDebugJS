@@ -1,0 +1,34 @@
+{
+	"manifest_version": 3,
+	"name": "WikiForgeDebugJS",
+	"description": "Injects JS for debugging purposes on WikiForge",
+	"author": "Universal Omega",
+	"version": "1.0.0",
+	"icons": {
+		"512": "logo.png"
+	},
+	"background": {
+		"service_worker": "background.js"
+	},
+	"action": {
+		"default_title": "WikiForgeDebugJS",
+		"default_popup": "popup.html"
+	},
+	"content_scripts": [
+		{
+			"matches": [
+				"*://*/*"
+			],
+			"js": ["content_script.js"]
+		}
+	],
+	"permissions": [
+		"activeTab",
+		"scripting",
+		"tabs",
+		"webNavigation"
+	],
+	"host_permissions": [
+		"<all_urls>"
+	]
+}
