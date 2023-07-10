@@ -1,3 +1,4 @@
+( function ( $, mw ) {
 function parseHttpHeaders(httpHeaders) {
 	return httpHeaders.split("\n").map(function (x) {
 		return x.split(/: */, 2);
@@ -53,6 +54,5 @@ function checkHtmlBody() {
 	}
 }
 
-window.onload = function() {
-	checkHtmlBody();
-};
+checkHtmlBody();
+}( jQuery, mediaWiki ) );
