@@ -1,7 +1,7 @@
 // In the format of: 'hostname': 'selector'
 const WIKI_FARMS = {
 	// Covers both WikiForge and WikiTide
-	'wikiforge.net': 'wikiforge',
+	'wikiforge.net': 'static.wikiforge.net',
 	// Add more wiki farms here as needed
 };
 
@@ -41,19 +41,19 @@ function parseHttpHeaders(httpHeaders) {
 	}, {});
 }
 
-function checkHtmlBody() {
-	const bodyContent = document.body.innerHTML;
+function checkHtmlHead() {
+	const headContent = document.head.innerHTML;
 
 	const includesAnyOf = (string, substrings) => {
 		return substrings.some((substring) => string.includes(substring));
 	};
 
 	const matchingWikiFarms = Object.entries(WIKI_FARMS).filter(([domain]) => {
-		return includesAnyOf(bodyContent, [domain]);
+		return includesAnyOf(headContent, [domain]);
 	});
 
 	if (matchingWikiFarms.length === 0) {
-		return; // No matching wiki farms found in the HTML body
+		return; // No matching wiki farms found in the HTML head
 	}
 
 	const xhr = new XMLHttpRequest();
@@ -121,4 +121,4 @@ function handleApiResponse(data, targetElement) {
 	targetElement.appendChild(liJobsElement);
 }
 
-checkHtmlBody();
+checkHtmlHead();
