@@ -64,9 +64,9 @@ function checkHtmlBody() {
 		const headers = parseHttpHeaders(xhr.getAllResponseHeaders()),
 			respTime = getMediaWikiVariable('wgBackendResponseTime'),
 			backend = 'PHP7',
-			server = getMediaWikiVariable('wgHostname'),
-			cp = (headers['x-served-by'] ? headers['x-served-by'] : '').replace(/.wikiforge.net|^mw[0-9]+|^test[0-9]+|\s|,/g, ''),
-			dbname = getMediaWikiVariable('wgDBname') || 'unknown',
+			server = getMediaWikiVariable('wgHostname').replace(new RegExp(matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), ''),
+			cp = (headers['x-served-by'] ? headers['x-served-by'] : '').replace(new RegExp(matchingWikiFarms[0][0] + '|^mw[0-9]+|^test[0-9]+|\\s|,', 'g'), ''),
+			dbname = getMediaWikiVariable('wgDBname') || 'unknownwiki',
 			info = respTime.toString() + 'ms (<b>' + backend + '</b> via ' + dbname + '@' + server + (cp ? ' / ' + cp : '') + ')';
 
 		const skin = document.body.className.match(/skin-([a-z]+)/);
