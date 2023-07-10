@@ -24,6 +24,11 @@ function parseHttpHeaders(httpHeaders) {
 	}, {});
 }
 
+const cache = {};
+
+// Two minutes
+const cacheDuration = 120000;
+
 function checkHtmlBody() {
 	if (document.body.innerHTML.includes("wikiforge")) {
 		const xhr = new XMLHttpRequest();
@@ -43,11 +48,11 @@ function checkHtmlBody() {
 			const skinName = skin ? skin[1] : '';
 
 			if (skinName === 'cosmos') {
-				var liInfoElement = document.createElement('li');
+				const liInfoElement = document.createElement('li');
 				liInfoElement.innerHTML = info;
 				document.querySelector('#p-tb ul').appendChild(liInfoElement);
 			} else {
-				var liInfoElement = document.createElement('li');
+				const liInfoElement = document.createElement('li');
 				liInfoElement.innerHTML = info;
 				document.querySelector('#p-personal ul').appendChild(liInfoElement);
 			}
@@ -60,25 +65,44 @@ function checkHtmlBody() {
 				format: 'json',
 			};
 
-			fetch(apiUrl + '?' + new URLSearchParams(params))
-				.then(function (response) {
-					return response.json();
-				})
-				.then(function (data) {
-					const jobs = data.query.statistics.jobs,
-						caption = 'Queued Jobs: ' + jobs;
+			// Check if the API response is cached and not expired
+			if (cache.hasOwnProperty(apiUrl) && (Date.now() - cache[apiUrl].timestamp) < cacheDuration) {
+				handleApiResponse(cache[apiUrl].data);
+			} else {
+				// Fetch the API response
+				fetch(apiUrl + '?' + new URLSearchParams(params))
+					.then(function (response) {
+						return response.json();
+					})
+					.then(function (data) {
+						// Cache the API response with the timestamp
+						cache[apiUrl] = {
+							data: data,
+							timestamp: Date.now()
+						};
 
-					if (skinName === 'cosmos') {
-						var liJobsElement = document.createElement('li');
-						liJobsElement.innerHTML = caption;
-						document.querySelector('#p-tb ul').appendChild(liJobsElement);
-					} else {
-						var liJobsElement = document.createElement('li');
-						liJobsElement.innerHTML = caption;
-						document.querySelector('#p-personal ul').appendChild(liJobsElement);
-					}
-				});
+						handleApiResponse(data);
+					});
+			}
 		};
+	}
+}
+
+function handleApiResponse(data) {
+	const jobs = data.query.statistics.jobs,
+		caption = 'Queued Jobs: ' + jobs;
+
+	const skin = document.body.className.match(/skin-([a-z]+)/);
+	const skinName = skin ? skin[1] : '';
+
+	if (skinName === 'cosmos') {
+		const liJobsElement = document.createElement('li');
+		liJobsElement.innerHTML = caption;
+		document.querySelector('#p-tb ul').appendChild(liJobsElement);
+	} else {
+		const liJobsElement = document.createElement('li');
+		liJobsElement.innerHTML = caption;
+		document.querySelector('#p-personal ul').appendChild(liJobsElement);
 	}
 }
 
