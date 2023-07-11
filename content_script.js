@@ -141,4 +141,4 @@ function handleApiResponse(data, targetElement) {
 	targetElement.appendChild(liJobsElement);
 }
 
-checkHtmlHead();
+window.onload = checkHtmlHead();
