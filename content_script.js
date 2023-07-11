@@ -3,6 +3,7 @@
 const WIKI_FARMS = {
 	'fandom.com': 'static.wikia.nocookie.net',
 	'miraheze.org': 'static.miraheze.org',
+	'shoutwiki.com': 'images.shoutwiki.com',
 	'wikiforge.net': 'static.wikiforge.net',
 };
 
