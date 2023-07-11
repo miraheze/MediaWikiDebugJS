@@ -11,6 +11,11 @@ const CP_HEADERS = {
 	'default': 'x-served-by',
 };
 
+const DB_NAMES = {
+	'fandom.com': 'wikiDbName',
+	'default': 'wgDBname',
+};
+
 const API_URLS = {
 	'fandom.com': '/api.php',
 	'default': '/w/api.php',
@@ -81,7 +86,7 @@ function checkHtmlHead() {
 			server = getMediaWikiVariable('wgHostname') ? getMediaWikiVariable('wgHostname').replace(new RegExp('.' + matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), '') : '',
 			cpHeader = CP_HEADERS[matchingWikiFarms[0][0]] || CP_HEADERS['default'],
 			cp = (headers[cpHeader] ? headers[cpHeader] : '').replace(new RegExp('.' + matchingWikiFarms[0][0] + '|^mw[0-9]+|^test[0-9]+|\\s|,', 'g'), ''),
-			dbname = getMediaWikiVariable('wgDBname') || 'unknownwiki',
+			dbname = getMediaWikiVariable(DB_NAMES[matchingWikiFarms[0][0]] || DB_NAMES['default']) || 'unknownwiki',
 			info = respTime.toString() + 'ms (<b>' + backend + '</b> via ' + dbname + '@' + server + (cp ? ' / ' + cp : '') + ')';
 
 		const skin = document.body.className.match(/skin-([a-z]+)/);
