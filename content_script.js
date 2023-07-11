@@ -1,31 +1,14 @@
 // In the format of: 'hostname': 'selector'
 // Add more wiki farms as needed
 const WIKI_FARMS = {
-	'fandom.com': 'static.wikia.nocookie.net',
 	'miraheze.org': 'static.miraheze.org',
 	'wikiforge.net': 'static.wikiforge.net',
-};
-
-const CP_HEADERS = {
-	'fandom.com': 'x-datacenter',
-	'default': 'x-served-by',
-};
-
-const DB_NAMES = {
-	'fandom.com': 'wikiDbName',
-	'default': 'wgDBname',
-};
-
-const API_URLS = {
-	'fandom.com': '/api.php',
-	'default': '/w/api.php',
 };
 
 // In the format of: skinname: 'selector'
 // Add more skin selectors as needed
 const SKIN_SELECTORS = {
 	cosmos: '#p-tb ul',
-	fandomdesktop: '.page-footer',
 	minerva: 'ul#p-personal',
 	default: '#p-personal ul',
 };
@@ -84,9 +67,8 @@ function checkHtmlHead() {
 			backendHeader = headers['x-powered-by'],
 			backend = backendHeader ? `PHP${backendHeader.replace(/^PHP\/([0-9]+).*/, '$1')}` : 'PHP',
 			server = getMediaWikiVariable('wgHostname') ? getMediaWikiVariable('wgHostname').replace(new RegExp('.' + matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), '') : '',
-			cpHeader = CP_HEADERS[matchingWikiFarms[0][0]] || CP_HEADERS['default'],
-			cp = (headers[cpHeader] ? headers[cpHeader] : '').replace(new RegExp('.' + matchingWikiFarms[0][0] + '|^mw[0-9]+|^test[0-9]+|\\s|,', 'g'), ''),
-			dbname = getMediaWikiVariable(DB_NAMES[matchingWikiFarms[0][0]] || DB_NAMES['default']) || 'unknownwiki',
+			cp = (headers['x-served-by'] ? headers['x-served-by'] : '').replace(new RegExp('.' + matchingWikiFarms[0][0] + '|^mw[0-9]+|^test[0-9]+|\\s|,', 'g'), ''),
+			dbname = getMediaWikiVariable('wgDBname') || 'unknownwiki',
 			info = respTime.toString() + 'ms (<b>' + backend + '</b> via ' + dbname + (server || cp ? '@' + server : '') + (cp ? (server ? ' / ' : '') + cp : '') + ')';
 
 		const skin = document.body.className.match(/skin-([a-z]+)/);
@@ -104,7 +86,7 @@ function checkHtmlHead() {
 
 		targetElement.appendChild(liInfoElement);
 
-		const apiUrl = API_URLS[matchingWikiFarms[0][0]] || API_URLS['default'];
+		const apiUrl = '/w/api.php';
 		const params = {
 			action: 'query',
 			meta: 'siteinfo',
