@@ -6,6 +6,16 @@ const WIKI_FARMS = {
 	'wikiforge.net': 'static.wikiforge.net',
 };
 
+const CP_HEADERS = {
+	'fandom.com': 'x-datacenter',
+	'default': 'x-served-by',
+};
+
+const API_URLS = {
+	'fandom.com': '/api.php',
+	'default': '/w/api.php',
+};
+
 // In the format of: skinname: 'selector'
 // Add more skin selectors as needed
 const SKIN_SELECTORS = {
@@ -69,7 +79,8 @@ function checkHtmlHead() {
 			backendHeader = headers['x-powered-by'],
 			backend = backendHeader ? `PHP${backendHeader.replace(/^PHP\/([0-9]+).*/, '$1')}` : 'PHP',
 			server = getMediaWikiVariable('wgHostname') ? getMediaWikiVariable('wgHostname').replace(new RegExp('.' + matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), '') : '',
-			cp = (headers['x-served-by'] ? headers['x-served-by'] : '').replace(new RegExp('.' + matchingWikiFarms[0][0] + '|^mw[0-9]+|^test[0-9]+|\\s|,', 'g'), ''),
+			cpHeader = CP_HEADERS[matchingWikiFarms[0][0]] || CP_HEADERS['default'],
+			cp = (headers[cpHeader] ? headers[cpHeader] : '').replace(new RegExp('.' + matchingWikiFarms[0][0] + '|^mw[0-9]+|^test[0-9]+|\\s|,', 'g'), ''),
 			dbname = getMediaWikiVariable('wgDBname') || 'unknownwiki',
 			info = respTime.toString() + 'ms (<b>' + backend + '</b> via ' + dbname + '@' + server + (cp ? ' / ' + cp : '') + ')';
 
@@ -88,7 +99,7 @@ function checkHtmlHead() {
 
 		targetElement.appendChild(liInfoElement);
 
-		const apiUrl = '/w/api.php';
+		const apiUrl = API_URLS[matchingWikiFarms[0][0]] || API_URLS['default'];
 		const params = {
 			action: 'query',
 			meta: 'siteinfo',
