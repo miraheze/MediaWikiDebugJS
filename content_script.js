@@ -87,7 +87,7 @@ function checkHtmlHead() {
 			cpHeader = CP_HEADERS[matchingWikiFarms[0][0]] || CP_HEADERS['default'],
 			cp = (headers[cpHeader] ? headers[cpHeader] : '').replace(new RegExp('.' + matchingWikiFarms[0][0] + '|^mw[0-9]+|^test[0-9]+|\\s|,', 'g'), ''),
 			dbname = getMediaWikiVariable(DB_NAMES[matchingWikiFarms[0][0]] || DB_NAMES['default']) || 'unknownwiki',
-			info = respTime.toString() + 'ms (<b>' + backend + '</b> via ' + dbname + '@' + server + (cp ? ' / ' + cp : '') + ')';
+			info = respTime.toString() + 'ms (<b>' + backend + '</b> via ' + dbname + (server ? '@' + server : '') + (cp ? ' / ' + cp : '') + ')';
 
 		const skin = document.body.className.match(/skin-([a-z]+)/);
 		const skinName = skin ? skin[1] : '';
