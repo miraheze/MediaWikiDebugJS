@@ -5,6 +5,7 @@ const WIKI_FARMS = {
 	'miraheze.org': 'static.miraheze.org',
 	'shoutwiki-servers.com': 'images.shoutwiki.com',
 	'wikiforge.net': 'static.wikiforge.net',
+	'wikimedia.org': 'upload.wikimedia.org',
 };
 
 const CP_HEADERS = {
