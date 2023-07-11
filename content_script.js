@@ -1,3 +1,38 @@
+// In the format of: 'hostname': 'selector'
+// Add more wiki farms as needed
+const WIKI_FARMS = {
+	'fandom.com': 'static.wikia.nocookie.net',
+	'miraheze.org': 'static.miraheze.org',
+	'wikiforge.net': 'static.wikiforge.net',
+};
+
+const CP_HEADERS = {
+	'fandom.com': 'x-datacenter',
+	'default': 'x-served-by',
+};
+
+const DB_NAMES = {
+	'fandom.com': 'wikiDbName',
+	'default': 'wgDBname',
+};
+
+const API_URLS = {
+	'fandom.com': '/api.php',
+	'default': '/w/api.php',
+};
+
+// In the format of: skinname: 'selector'
+// Add more skin selectors as needed
+const SKIN_SELECTORS = {
+	cosmos: '#p-tb ul',
+	fandomdesktop: '.page-footer',
+	minerva: 'ul#p-personal',
+	default: '#p-personal ul',
+};
+
+const cache = {};
+const cacheDuration = 300000; // 5 minutes
+
 // Equivalent to `mw.config.get('variable')`. We have to scrape the value
 // from the script source because Chrome extension content scripts do not share
 // an execution environment with other JavaScript code.
@@ -24,94 +59,86 @@ function parseHttpHeaders(httpHeaders) {
 	}, {});
 }
 
-const cache = {};
+function checkHtmlHead() {
+	const headContent = document.head.innerHTML;
 
-// 5 minutes
-const cacheDuration = 300000;
+	const includesAnyOf = (string, substrings) => {
+		return substrings.some((substring) => string.includes(substring));
+	};
 
-function checkHtmlBody() {
-	if (document.body.innerHTML.includes("wikiforge")) {
-		const xhr = new XMLHttpRequest();
-		xhr.open('HEAD', document.location);
-		xhr.send();
+	const matchingWikiFarms = Object.entries(WIKI_FARMS).filter(([domain]) => {
+		return includesAnyOf(headContent, [domain]);
+	});
 
-		xhr.onload = function () {
-			const headers = parseHttpHeaders(xhr.getAllResponseHeaders()),
-				respTime = getMediaWikiVariable('wgBackendResponseTime'),
-				backend = 'PHP7',
-				server = getMediaWikiVariable('wgHostname').replace('.wikiforge.net', ''),
-				cp = (headers['x-served-by'] ? headers['x-served-by'] : '').replace(/.wikiforge.net|^mw[0-9]+|^test[0-9]+|\s|,/g, ''),
-				dbname = getMediaWikiVariable('wgDBname') || 'unknown',
-				info = respTime.toString() + 'ms (<b>' + backend + '</b> via ' + dbname + '@' + server + (cp ? ' / ' + cp : '') + ')';
+	if (matchingWikiFarms.length === 0) {
+		return; // No matching wiki farms found in the HTML head
+	}
 
-			const skin = document.body.className.match(/skin-([a-z]+)/);
-			const skinName = skin ? skin[1] : '';
+	const xhr = new XMLHttpRequest();
+	xhr.open('HEAD', document.location);
+	xhr.send();
 
-			if (skinName === 'cosmos') {
-				const liInfoElement = document.createElement('li');
-				liInfoElement.innerHTML = info;
-				document.querySelector('#p-tb ul').appendChild(liInfoElement);
-			} else if (skinName === 'minerva') {
-				const liInfoElement = document.createElement('li');
-				liInfoElement.innerHTML = info;
-				document.querySelector('ul#p-personal').appendChild(liInfoElement);
-			} else {
-				const liInfoElement = document.createElement('li');
-				liInfoElement.innerHTML = info;
-				document.querySelector('#p-personal ul').appendChild(liInfoElement);
-			}
+	xhr.onload = function () {
+		const headers = parseHttpHeaders(xhr.getAllResponseHeaders()),
+			respTime = getMediaWikiVariable('wgBackendResponseTime'),
+			backendHeader = headers['x-powered-by'],
+			backend = backendHeader ? `PHP${backendHeader.replace(/^PHP\/([0-9]+).*/, '$1')}` : 'PHP',
+			server = getMediaWikiVariable('wgHostname') ? getMediaWikiVariable('wgHostname').replace(new RegExp('.' + matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), '') : '',
+			cpHeader = CP_HEADERS[matchingWikiFarms[0][0]] || CP_HEADERS['default'],
+			cp = (headers[cpHeader] ? headers[cpHeader] : '').replace(new RegExp('.' + matchingWikiFarms[0][0] + '|^mw[0-9]+|^test[0-9]+|\\s|,', 'g'), ''),
+			dbname = getMediaWikiVariable(DB_NAMES[matchingWikiFarms[0][0]] || DB_NAMES['default']) || 'unknownwiki',
+			info = respTime.toString() + 'ms (<b>' + backend + '</b> via ' + dbname + (server || cp ? '@' + server : '') + (cp ? (server ? ' / ' : '') + cp : '') + ')';
 
-			const apiUrl = '/w/api.php';
-			const params = {
-				action: 'query',
-				meta: 'siteinfo',
-				siprop: 'statistics',
-				format: 'json',
-			};
+		const skin = document.body.className.match(/skin-([a-z]+)/);
+		const skinName = skin ? skin[1] : '';
 
-			// Check if the API response is cached and not expired
-			if (cache.hasOwnProperty(apiUrl) && (Date.now() - cache[apiUrl].timestamp) < cacheDuration) {
-				handleApiResponse(cache[apiUrl].data);
-			} else {
-				// Fetch the API response
-				fetch(apiUrl + '?' + new URLSearchParams(params))
-					.then(function (response) {
-						return response.json();
-					})
-					.then(function (data) {
-						// Cache the API response with the timestamp
-						cache[apiUrl] = {
-							data: data,
-							timestamp: Date.now()
-						};
+		const skinSelector = SKIN_SELECTORS[skinName] || SKIN_SELECTORS['default'];
 
-						handleApiResponse(data);
-					});
-			}
+		const targetElement = document.querySelector(skinSelector);
+		if (!targetElement) {
+			return; // No matching target element found for the skin selector
+		}
+
+		const liInfoElement = document.createElement('li');
+		liInfoElement.innerHTML = info;
+
+		targetElement.appendChild(liInfoElement);
+
+		const apiUrl = API_URLS[matchingWikiFarms[0][0]] || API_URLS['default'];
+		const params = {
+			action: 'query',
+			meta: 'siteinfo',
+			siprop: 'statistics',
+			format: 'json',
 		};
-	}
+
+		if (cache.hasOwnProperty(apiUrl) && (Date.now() - cache[apiUrl].timestamp) < cacheDuration) {
+			handleApiResponse(cache[apiUrl].data, targetElement);
+		} else {
+			fetch(apiUrl + '?' + new URLSearchParams(params))
+				.then(function (response) {
+					return response.json();
+				})
+				.then(function (data) {
+					cache[apiUrl] = {
+						data: data,
+						timestamp: Date.now(),
+					};
+
+					handleApiResponse(data, targetElement);
+				});
+		}
+	};
 }
 
-function handleApiResponse(data) {
-	const jobs = data.query.statistics.jobs,
-		caption = 'Queued Jobs: ' + jobs;
+function handleApiResponse(data, targetElement) {
+	const jobs = data.query.statistics.jobs;
+	const caption = 'Queued Jobs: ' + jobs;
 
-	const skin = document.body.className.match(/skin-([a-z]+)/);
-	const skinName = skin ? skin[1] : '';
+	const liJobsElement = document.createElement('li');
+	liJobsElement.innerHTML = caption;
 
-	if (skinName === 'cosmos') {
-		const liJobsElement = document.createElement('li');
-		liJobsElement.innerHTML = caption;
-		document.querySelector('#p-tb ul').appendChild(liJobsElement);
-	}  else if (skinName === 'minerva') {
-		const liJobsElement = document.createElement('li');
-		liJobsElement.innerHTML = caption;
-		document.querySelector('ul#p-personal').appendChild(liJobsElement);
-	} else {
-		const liJobsElement = document.createElement('li');
-		liJobsElement.innerHTML = caption;
-		document.querySelector('#p-personal ul').appendChild(liJobsElement);
-	}
+	targetElement.appendChild(liJobsElement);
 }
 
-checkHtmlBody();
+window.onload = checkHtmlHead();
