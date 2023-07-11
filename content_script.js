@@ -10,6 +10,7 @@ const WIKI_FARMS = {
 
 const CP_HEADERS = {
 	'fandom.com': 'x-datacenter',
+	'wikimedia.org': 'x-cache',
 	'default': 'x-served-by',
 };
 
