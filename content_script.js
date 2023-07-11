@@ -1,6 +1,7 @@
 // In the format of: 'hostname': 'selector'
-	// Add more wiki farms as needed
+// Add more wiki farms as needed
 const WIKI_FARMS = {
+	'fandom.com': 'static.wikia.nocookie.net',
 	'miraheze.org': 'static.miraheze.org',
 	'wikiforge.net': 'static.wikiforge.net',
 };
@@ -64,7 +65,8 @@ function checkHtmlHead() {
 	xhr.onload = function () {
 		const headers = parseHttpHeaders(xhr.getAllResponseHeaders()),
 			respTime = getMediaWikiVariable('wgBackendResponseTime'),
-			backend = 'PHP7',
+			backendHeader = headers['x-powered-by'],
+			backend = backendHeader ? `PHP${backendHeader.replace(/^PHP\/([0-9]+).*/, '$1')}` : 'PHP',
 			server = getMediaWikiVariable('wgHostname').replace(new RegExp('.' + matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), ''),
 			cp = (headers['x-served-by'] ? headers['x-served-by'] : '').replace(new RegExp('.' + matchingWikiFarms[0][0] + '|^mw[0-9]+|^test[0-9]+|\\s|,', 'g'), ''),
 			dbname = getMediaWikiVariable('wgDBname') || 'unknownwiki',
