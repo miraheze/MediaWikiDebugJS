@@ -10,6 +10,7 @@ const WIKI_FARMS = {
 // Add more skin selectors as needed
 const SKIN_SELECTORS = {
 	cosmos: '#p-tb ul',
+	fandomdesktop: '.page-footer',
 	minerva: 'ul#p-personal',
 	default: '#p-personal ul',
 };
