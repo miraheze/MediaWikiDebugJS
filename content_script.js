@@ -14,7 +14,7 @@ const SKIN_SELECTORS = {
 };
 
 const cache = {};
-const cacheDuration = 300000; // 5 minutes
+const cacheDuration = 1000 * 60 * 5; // 5 minutes
 
 // Equivalent to `mw.config.get('variable')`. We have to scrape the value
 // from the script source because Chrome extension content scripts do not share
