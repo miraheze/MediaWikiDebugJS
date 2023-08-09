@@ -15,14 +15,14 @@ function injectScript({ tabId }) {
 		if (tab && tab.url) {
 			chrome.scripting.executeScript({
 				target: { tabId },
-				function: checkHtmlBody,
+				function: checkHtmlHead,
 				args: [{ tabUrl: tab.url }]
 			});
 		}
 	});
 }
 
-function checkHtmlBody({ tabUrl }) {
+function checkHtmlHead({ tabUrl }) {
 	chrome.scripting.executeScript({
 		target: { tabId: tabId },
 		function: injectScript,
