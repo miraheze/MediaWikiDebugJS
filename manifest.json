@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "MediaWikiDebugJS",
-	"description": "Injects JS for debugging purposes on WikiForge",
+	"description": "Injects JS for debugging purposes for MediaWiki Wiki Farms",
 	"author": "Universal Omega",
 	"version": "1.0.0",
 	"icons": {
