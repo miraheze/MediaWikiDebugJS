@@ -1,1 +1,1 @@
-# WikiForgeDebugJS
+# MediaWikiDebugJS

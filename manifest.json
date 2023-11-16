@@ -1,6 +1,6 @@
 {
 	"manifest_version": 3,
-	"name": "WikiForgeDebugJS",
+	"name": "MediaWikiDebugJS",
 	"description": "Injects JS for debugging purposes on WikiForge",
 	"author": "Universal Omega",
 	"version": "1.0.0",
@@ -11,7 +11,7 @@
 		"service_worker": "background.js"
 	},
 	"action": {
-		"default_title": "WikiForgeDebugJS",
+		"default_title": "MediaWikiDebugJS",
 		"default_popup": "popup.html"
 	},
 	"content_scripts": [
