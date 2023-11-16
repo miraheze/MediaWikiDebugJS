@@ -43,6 +43,49 @@ function parseHttpHeaders(httpHeaders) {
 	}, {});
 }
 
+function getXservedBy(headers) {
+	const xservedByHeader = headers['x-served-by'];
+	if (xservedByHeader) {
+		const xservedByValues = xservedByHeader.split(',');
+		return xservedByValues.length > 1 ? xservedByValues[1] : xservedByValues[0];
+	}
+
+	return '';
+}
+
+// If it has matomo, we can try to use that to
+// extract wiki database name
+function getMatomoScript() {
+	const scripts = document.querySelectorAll('script');
+	for (const script of scripts) {
+		const scriptContent = script.textContent;
+		if (scriptContent.includes('matomo.js') && scriptContent.includes('setDocumentTitle')) {
+			return scriptContent;
+		}
+	}
+
+	return null;
+}
+
+function getDBNameFromMatomoScript() {
+	const matomoScript = getMatomoScript();
+	if (!matomoScript) {
+		return null;
+	}
+
+	const setDocumentTitleMatch = matomoScript.match(/_paq.push\(\['setDocumentTitle', "(.+?)".+?\]\)/);
+	return setDocumentTitleMatch ? setDocumentTitleMatch[1] : null;
+}
+
+function getDBName() {
+	const wgDBname = getMediaWikiVariable('wgDBname');
+	if (wgDBname) {
+		return wgDBname;
+	}
+
+	return getDBNameFromMatomoScript();
+}
+
 function checkHtmlHead() {
 	const headContent = document.head.innerHTML;
 
@@ -50,8 +93,8 @@ function checkHtmlHead() {
 		return substrings.some((substring) => string.includes(substring));
 	};
 
-	const matchingWikiFarms = Object.entries(WIKI_FARMS).filter(([domain]) => {
-		return includesAnyOf(headContent, [domain]);
+	const matchingWikiFarms = Object.entries(WIKI_FARMS).filter(([_, selector]) => {
+		return includesAnyOf(headContent, [selector]);
 	});
 
 	if (matchingWikiFarms.length === 0) {
@@ -68,8 +111,8 @@ function checkHtmlHead() {
 			backendHeader = headers['x-powered-by'],
 			backend = backendHeader ? `PHP${backendHeader.replace(/^PHP\/([0-9]+).*/, '$1')}` : 'PHP',
 			server = getMediaWikiVariable('wgHostname') ? getMediaWikiVariable('wgHostname').replace(new RegExp('.' + matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), '') : '',
-			cp = (headers['x-served-by'] ? headers['x-served-by'] : '').replace(new RegExp('.' + matchingWikiFarms[0][0] + '|^mw[0-9]+|^test[0-9]+|\\s|,', 'g'), ''),
-			dbname = getMediaWikiVariable('wgDBname') || 'unknownwiki',
+			cp = getXservedBy(headers).replace(new RegExp('.' + matchingWikiFarms.reverse()[0][0] + '|^mw[0-9]+|^test[0-9]+|\\s', 'g'), ''),
+			dbname = getDBName() || 'unknownwiki',
 			info = respTime.toString() + 'ms (<b>' + backend + '</b> via ' + dbname + (server || cp ? '@' + server : '') + (cp ? (server ? ' / ' : '') + cp : '') + ')';
 
 		const skin = document.body.className.match(/skin-([a-z]+)/);
