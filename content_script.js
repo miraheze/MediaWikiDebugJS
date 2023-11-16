@@ -3,7 +3,7 @@
 const WIKI_FARMS = {
 	'inside.wf': 'static.wikiforge.net',
 	'miraheze.org': 'static.miraheze.org',
-	'wikitide.net': 'static.wikiforge.net',
+	'wikitide.net': 'analytics.wikitide.net',
 };
 
 // In the format of: skinname: 'selector'
