@@ -1,8 +1,9 @@
 // In the format of: 'hostname': 'selector'
 // Add more wiki farms as needed
 const WIKI_FARMS = {
+	'inside.wf': 'static.wikiforge.net',
 	'miraheze.org': 'static.miraheze.org',
-	'wikiforge.net': 'static.wikiforge.net',
+	'wikitide.net': 'static.wikiforge.net',
 };
 
 // In the format of: skinname: 'selector'
