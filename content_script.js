@@ -9,8 +9,10 @@ const WIKI_FARMS = {
 // In the format of: skinname: 'selector'
 // Add more skin selectors as needed
 const SKIN_SELECTORS = {
+	citizen: '.citizen-footer__siteinfo',
 	cosmos: '#p-tb ul',
 	minerva: 'ul#p-personal',
+	'vector-2022': '.mw-content-container',
 	default: '#p-personal ul',
 };
 
@@ -115,8 +117,9 @@ function checkHtmlHead() {
 			dbname = getDBName() || 'unknownwiki',
 			info = respTime.toString() + 'ms (<b>' + backend + '</b> via ' + dbname + (server || cp ? '@' + server : '') + (cp ? (server ? ' / ' : '') + cp : '') + ')';
 
-		const skin = document.body.className.match(/skin-([a-z]+)/);
-		const skinName = skin ? skin[1] : '';
+		const skinMatches = [...document.body.className.matchAll(/skin-([a-z]+(?:-[0-9]+)?)/g)];
+		const skin = Array.from(new Set(skinMatches.map(match => match[1])));
+		const skinName = skin ? skin[1] || skin[0] : '';
 
 		const skinSelector = SKIN_SELECTORS[skinName] || SKIN_SELECTORS['default'];
 
