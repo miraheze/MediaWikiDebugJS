@@ -2,7 +2,7 @@
 // Add more wiki farms as needed
 const WIKI_FARMS = {
 	'inside.wf': 'static.wikiforge.net',
-	'miraheze.org': 'static.miraheze.org',
+	'miraheze.org': 'matomo.miraheze.org',
 	'wikitide.net': 'analytics.wikitide.net',
 };
 
