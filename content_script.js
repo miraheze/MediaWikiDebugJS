@@ -8,6 +8,7 @@ const WIKI_FARMS = {
 	'telepedia.net': 'static.telepedia.net',
 	'wikimedia.org': 'upload.wikimedia.org',
 	'wikitide.net': 'analytics.wikitide.net',
+	'wiki.gg': 'app.wiki.gg',
 };
 
 // In the format of: skinname: 'selector'
