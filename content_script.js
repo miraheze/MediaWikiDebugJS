@@ -4,7 +4,7 @@ const WIKI_FARMS = {
 	'fandom.com': 'static.wikia.nocookie.net',
 	'inside.wf': 'static.wikiforge.net',
 	'miraheze.org': 'matomo.miraheze.org',
-	'shoutwiki.com': 'www.shoutwiki.com',
+	'shoutwiki-servers.com': 'www.shoutwiki.com',
 	'telepedia.net': 'static.telepedia.net',
 	'wikimedia.org': 'upload.wikimedia.org',
 	'wikitide.net': 'analytics.wikitide.net',
