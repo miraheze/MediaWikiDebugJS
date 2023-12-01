@@ -1,9 +1,14 @@
 // In the format of: 'hostname': 'selector'
 // Add more wiki farms as needed
 const WIKI_FARMS = {
+	'fandom.com': 'static.wikia.nocookie.net',
 	'inside.wf': 'static.wikiforge.net',
 	'miraheze.org': 'matomo.miraheze.org',
+	'shoutwiki-servers.com': 'www.shoutwiki.com',
+	'telepedia.net': 'static.telepedia.net',
+	'wikimedia.org': 'upload.wikimedia.org',
 	'wikitide.net': 'analytics.wikitide.net',
+	'wiki.gg': 'app.wiki.gg',
 };
 
 // In the format of: skinname: 'selector'
@@ -11,6 +16,7 @@ const WIKI_FARMS = {
 const SKIN_SELECTORS = {
 	citizen: '.citizen-footer__siteinfo',
 	cosmos: '#p-tb ul',
+	fandomdesktop: '.page-footer',
 	minerva: 'ul#p-personal',
 	'vector-2022': '.mw-content-container',
 	default: '#p-personal ul',
@@ -46,7 +52,7 @@ function parseHttpHeaders(httpHeaders) {
 }
 
 function getXservedBy(headers) {
-	const xservedByHeader = headers['x-served-by'];
+	const xservedByHeader = headers['x-datacenter'] || headers['x-served-by'];
 	if (xservedByHeader) {
 		const xservedByValues = xservedByHeader.split(',');
 		return xservedByValues.length > 1 ? xservedByValues[1] : xservedByValues[0];
@@ -80,7 +86,7 @@ function getDBNameFromMatomoScript() {
 }
 
 function getDBName() {
-	const wgDBname = getMediaWikiVariable('wgDBname');
+	const wgDBname = getMediaWikiVariable('wgDBname') || getMediaWikiVariable('wikiDbName');
 	if (wgDBname) {
 		return wgDBname;
 	}
@@ -114,8 +120,8 @@ function checkHtmlHead() {
 			backend = backendHeader ? `PHP${backendHeader.replace(/^PHP\/([0-9]+).*/, '$1')}` : 'PHP',
 			server = getMediaWikiVariable('wgHostname') ? getMediaWikiVariable('wgHostname').replace(new RegExp('.' + matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), '') : '',
 			cp = getXservedBy(headers).replace(new RegExp('.' + matchingWikiFarms.reverse()[0][0] + '|^mw[0-9]+|^test[0-9]+|\\s', 'g'), ''),
-			dbname = getDBName() || 'unknownwiki',
-			info = respTime.toString() + 'ms (<b>' + backend + '</b> via ' + dbname + (server || cp ? '@' + server : '') + (cp ? (server ? ' / ' : '') + cp : '') + ')';
+			dbname = getDBName() || '',
+			info = respTime.toString() + 'ms (<b>' + backend + '</b> via ' + dbname + (server || cp ? (dbname ? '@' : '') + server : '') + (cp ? (server ? ' / ' : '') + cp : '') + ')';
 
 		const skinMatches = [...document.body.className.matchAll(/skin-([a-z]+(?:-[0-9]+)?)/g)];
 		const skin = Array.from(new Set(skinMatches.map(match => match[1])));
