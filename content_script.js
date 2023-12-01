@@ -1,8 +1,12 @@
 // In the format of: 'hostname': 'selector'
 // Add more wiki farms as needed
 const WIKI_FARMS = {
+	'fandom.com': 'static.wikia.nocookie.net',
 	'inside.wf': 'static.wikiforge.net',
 	'miraheze.org': 'matomo.miraheze.org',
+	'shoutwiki.com': 'www.shoutwiki.com',
+	'telepedia.net': 'static.telepedia.net',
+	'wikimedia.org': 'upload.wikimedia.org',
 	'wikitide.net': 'analytics.wikitide.net',
 };
 
@@ -11,6 +15,7 @@ const WIKI_FARMS = {
 const SKIN_SELECTORS = {
 	citizen: '.citizen-footer__siteinfo',
 	cosmos: '#p-tb ul',
+	fandomdesktop: '.page-footer',
 	minerva: 'ul#p-personal',
 	'vector-2022': '.mw-content-container',
 	default: '#p-personal ul',
@@ -80,7 +85,7 @@ function getDBNameFromMatomoScript() {
 }
 
 function getDBName() {
-	const wgDBname = getMediaWikiVariable('wgDBname');
+	const wgDBname = getMediaWikiVariable('wgDBname') || getMediaWikiVariable('wikiDbName');
 	if (wgDBname) {
 		return wgDBname;
 	}
