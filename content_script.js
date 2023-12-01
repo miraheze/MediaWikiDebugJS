@@ -52,7 +52,7 @@ function parseHttpHeaders(httpHeaders) {
 }
 
 function getXservedBy(headers) {
-	const xservedByHeader = headers['x-served-by'];
+	const xservedByHeader = headers['x-served-by'] || headers['x-datacenter'];
 	if (xservedByHeader) {
 		const xservedByValues = xservedByHeader.split(',');
 		return xservedByValues.length > 1 ? xservedByValues[1] : xservedByValues[0];
