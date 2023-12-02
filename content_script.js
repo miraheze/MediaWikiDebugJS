@@ -3,6 +3,7 @@
 const WIKI_FARMS = {
 	'fandom.com': 'static.wikia.nocookie.net',
 	'inside.wf': 'static.wikiforge.net',
+	'inside.wf': 'static.your.wf',
 	'miraheze.org': 'matomo.miraheze.org',
 	'shoutwiki-servers.com': 'www.shoutwiki.com',
 	'telepedia.net': 'static.telepedia.net',
