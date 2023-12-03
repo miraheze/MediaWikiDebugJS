@@ -190,7 +190,7 @@ function fetchData(url, callback) {
 		format: 'json',
 	};
 
-	fetch(url + '?' + new URLSearchParams(params))
+	return fetch(url + '?' + new URLSearchParams(params))
 		.then(function (response) {
 			if (!response.ok) {
 				throw new Error('Network response was not ok');
