@@ -140,6 +140,7 @@ function checkHtmlHead() {
 		targetElement.appendChild(liInfoElement);
 
 		const apiUrl = '/w/api.php';
+		const fallbackApiUrl = '/api.php';
 		const params = {
 			action: 'query',
 			meta: 'siteinfo',
@@ -150,30 +151,58 @@ function checkHtmlHead() {
 		if (cache.hasOwnProperty(apiUrl) && (Date.now() - cache[apiUrl].timestamp) < cacheDuration) {
 			handleApiResponse(cache[apiUrl].data, targetElement);
 		} else {
-			fetch(apiUrl + '?' + new URLSearchParams(params))
-				.then(function (response) {
-					return response.json();
-				})
-				.then(function (data) {
+			fetchData(apiUrl, function (data) {
+				cache[apiUrl] = {
+					data: data,
+					timestamp: Date.now(),
+				};
+				handleApiResponse(data, targetElement);
+			})
+			.catch(function () {
+				// If an error occurs with the primary URL, try the fallback URL
+				console.error('Error fetching data from API URL. Trying fallback.');
+				fetchData(fallbackApiUrl, function (fallbackData) {
 					cache[apiUrl] = {
-						data: data,
+						data: fallbackData,
 						timestamp: Date.now(),
 					};
-
-					handleApiResponse(data, targetElement);
+					handleApiResponse(fallbackData, targetElement);
+				})
+				.catch(function (fallbackError) {
+					console.error('Error fetching data from fallback API URL.', fallbackError);
 				});
+			});
 		}
 	};
 }
 
 function handleApiResponse(data, targetElement) {
-	const jobs = data.query.statistics.jobs;
-	const caption = 'Queued Jobs: ' + jobs;
+	const jobs = data?.query?.statistics?.jobs;
+	if (jobs) {
+		const caption = 'Queued Jobs: ' + jobs;
 
-	const liJobsElement = document.createElement('li');
-	liJobsElement.innerHTML = caption;
+		const liJobsElement = document.createElement('li');
+		liJobsElement.innerHTML = caption;
 
-	targetElement.appendChild(liJobsElement);
+		targetElement.appendChild(liJobsElement);
+	}
+}
+
+function fetchData(url, callback) {
+	fetch(url + '?' + new URLSearchParams(params))
+		.then(function (response) {
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+			return response.json();
+		})
+		.then(function (data) {
+			callback(data);
+		})
+		.catch(function (error) {
+			console.error(`Error fetching data from ${url}.`, error);
+			throw error;
+		});
 }
 
 window.onload = checkHtmlHead();
