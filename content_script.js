@@ -154,7 +154,7 @@ function checkHtmlHead() {
 			})
 			.catch(function () {
 				// If an error occurs with the primary URL, try the fallback URL
-				console.error('Error fetching data from API URL. Trying fallback.');
+				console.log('Error fetching data from API URL. Trying fallback.');
 				fetchData(fallbackApiUrl, function (fallbackData) {
 					cache[apiUrl] = {
 						data: fallbackData,
@@ -163,7 +163,7 @@ function checkHtmlHead() {
 					handleApiResponse(fallbackData, targetElement);
 				})
 				.catch(function (fallbackError) {
-					console.error('Error fetching data from fallback API URL.', fallbackError);
+					console.log('Error fetching data from fallback API URL.');
 				});
 			});
 		}
@@ -201,7 +201,7 @@ function fetchData(url, callback) {
 			callback(data);
 		})
 		.catch(function (error) {
-			console.error(`Error fetching data from ${url}.`, error);
+			console.log(`Error fetching data from ${url}.`);
 			throw error;
 		});
 }
