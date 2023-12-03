@@ -41,24 +41,6 @@ function getMediaWikiVariable(variable) {
 	}
 }
 
-async function getBackendResponseTime() {
-	const respTime = getMediaWikiVariable('wgBackendResponseTime');
-	if (respTime) {
-		return respTime;
-	}
-
-	const sendDate = new Date().getTime();
-	return fetch(window.location.href)
-		.then(function(response) {
-			const receiveDate = new Date().getTime();
-			const responseTimeMs = receiveDate - sendDate;
-			return Promise.resolve(responseTimeMs);
-		})
-		.catch(function(error) {
-			console.log('Could not fetch URL: ' + window.location.href);
-		});
-}
-
 function parseHttpHeaders(httpHeaders) {
 	return httpHeaders.split("\n").map(function (x) {
 		return x.split(/: */, 2);
@@ -80,18 +62,18 @@ function getXservedBy(headers) {
 	return '';
 }
 
-function getBackendResponseTime() {
+async function getBackendResponseTime() {
 	const respTime = getMediaWikiVariable('wgBackendResponseTime');
 	if (respTime) {
 		return respTime;
 	}
 
 	const sendDate = new Date().getTime();
-	fetch(window.location.href)
-  		.then(function(response) {
-    			const receiveDate = new Date().getTime();
-    			const responseTimeMs = receiveDate - sendDate;
-			return responseTimeMs;
+	return fetch(window.location.href)
+		.then(function(response) {
+			const receiveDate = new Date().getTime();
+			const responseTimeMs = receiveDate - sendDate;
+			return Promise.resolve(responseTimeMs);
 		})
 		.catch(function(error) {
 			console.log('Could not fetch URL: ' + window.location.href);
@@ -131,7 +113,7 @@ function getDBName() {
 	return getDBNameFromMatomoScript();
 }
 
-async function checkHtmlHead() {
+function checkHtmlHead() {
 	const headContent = document.head.innerHTML;
 
 	const includesAnyOf = (string, substrings) => {
@@ -150,7 +132,7 @@ async function checkHtmlHead() {
 	xhr.open('HEAD', document.location);
 	xhr.send();
 
-	xhr.onload = function () {
+	xhr.onload = async function () {
 		const headers = parseHttpHeaders(xhr.getAllResponseHeaders()),
 			respTime = getMediaWikiVariable('wgBackendResponseTime') || await getBackendResponseTime(),
 			backendHeader = headers['x-powered-by'],
@@ -158,7 +140,7 @@ async function checkHtmlHead() {
 			server = getMediaWikiVariable('wgHostname') ? getMediaWikiVariable('wgHostname').replace(new RegExp('.' + matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), '') : '',
 			cp = getXservedBy(headers).replace(new RegExp('.' + matchingWikiFarms.map(wikiFarm => wikiFarm[0]).join('|') + '|cache-(yvr|den)|^mw[0-9]+|^test[0-9]+|\\s', 'g'), ''),
 			dbname = getDBName() || '',
-			info = respTime.toString() + 'ms (<b>' + backend + '</b> via ' + dbname + (server || cp ? (dbname ? '@' : '') + server : '') + (cp ? (server ? ' / ' : '') + cp : '') + ')';
+			info = respTime.toString() + 'ms (<b>' + backend.trim() + '</b>' + ( ( dbname || server || cp ) ? ' via ' + dbname + (server || cp ? (dbname ? '@' : '') + server : '') + (cp ? (server ? ' / ' : '') + cp : '') : '' ) + ')';
 
 		const skinMatches = [...document.body.className.matchAll(/skin-([a-z]+(?:-[0-9]+)?)/g)];
 		const skin = Array.from(new Set(skinMatches.map(match => match[1])));
