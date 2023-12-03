@@ -141,12 +141,6 @@ function checkHtmlHead() {
 
 		const apiUrl = '/w/api.php';
 		const fallbackApiUrl = '/api.php';
-		const params = {
-			action: 'query',
-			meta: 'siteinfo',
-			siprop: 'statistics',
-			format: 'json',
-		};
 
 		if (cache.hasOwnProperty(apiUrl) && (Date.now() - cache[apiUrl].timestamp) < cacheDuration) {
 			handleApiResponse(cache[apiUrl].data, targetElement);
@@ -189,6 +183,13 @@ function handleApiResponse(data, targetElement) {
 }
 
 function fetchData(url, callback) {
+	const params = {
+		action: 'query',
+		meta: 'siteinfo',
+		siprop: 'statistics',
+		format: 'json',
+	};
+
 	fetch(url + '?' + new URLSearchParams(params))
 		.then(function (response) {
 			if (!response.ok) {
