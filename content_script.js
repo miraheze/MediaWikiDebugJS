@@ -114,6 +114,10 @@ function getDBName() {
 }
 
 function checkHtmlHead() {
+	if (!document.body.classList.contains('mediawiki')) {
+		return;
+	}
+
 	const headContent = document.head.innerHTML;
 
 	const includesAnyOf = (string, substrings) => {
