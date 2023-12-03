@@ -1,6 +1,7 @@
 // In the format of: 'hostname': 'selector'
-// Add more wiki farms as needed
+// Add more wiki farms as needed (alphabetical order)
 const WIKI_FARMS = {
+	'editthis.info': 'editthis.info',
 	'fandom.com': 'static.wikia.nocookie.net',
 	'inside.wf': 'static.wikiforge.net',
 	'miraheze.org': 'matomo.miraheze.org',
@@ -61,6 +62,24 @@ function getXservedBy(headers) {
 	return '';
 }
 
+async function getBackendResponseTime() {
+	const respTime = getMediaWikiVariable('wgBackendResponseTime');
+	if (respTime) {
+		return respTime;
+	}
+
+	const sendDate = new Date().getTime();
+	return fetch(window.location.href)
+		.then(function(response) {
+			const receiveDate = new Date().getTime();
+			const responseTimeMs = receiveDate - sendDate;
+			return Promise.resolve(responseTimeMs);
+		})
+		.catch(function(error) {
+			console.log('Could not fetch URL: ' + window.location.href);
+		});
+}
+
 // If it has matomo, we can try to use that to
 // extract wiki database name
 function getMatomoScript() {
@@ -95,6 +114,10 @@ function getDBName() {
 }
 
 function checkHtmlHead() {
+	if (!document.body.classList.contains('mediawiki')) {
+		return;
+	}
+
 	const headContent = document.head.innerHTML;
 
 	const includesAnyOf = (string, substrings) => {
@@ -113,15 +136,15 @@ function checkHtmlHead() {
 	xhr.open('HEAD', document.location);
 	xhr.send();
 
-	xhr.onload = function () {
+	xhr.onload = async function () {
 		const headers = parseHttpHeaders(xhr.getAllResponseHeaders()),
-			respTime = getMediaWikiVariable('wgBackendResponseTime'),
+			respTime = getMediaWikiVariable('wgBackendResponseTime') || await getBackendResponseTime(),
 			backendHeader = headers['x-powered-by'],
 			backend = backendHeader ? `PHP${backendHeader.replace(/^PHP\/([0-9]+).*/, '$1')}` : 'PHP',
 			server = getMediaWikiVariable('wgHostname') ? getMediaWikiVariable('wgHostname').replace(new RegExp('.' + matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), '') : '',
 			cp = getXservedBy(headers).replace(new RegExp('.' + matchingWikiFarms.map(wikiFarm => wikiFarm[0]).join('|') + '|cache-(yvr|den)|^mw[0-9]+|^test[0-9]+|\\s', 'g'), ''),
 			dbname = getDBName() || '',
-			info = respTime.toString() + 'ms (<b>' + backend + '</b> via ' + dbname + (server || cp ? (dbname ? '@' : '') + server : '') + (cp ? (server ? ' / ' : '') + cp : '') + ')';
+			info = respTime.toString() + 'ms (<b>' + backend.trim() + '</b>' + ( ( dbname || server || cp ) ? ' via ' + dbname + (server || cp ? (dbname ? '@' : '') + server : '') + (cp ? (server ? ' / ' : '') + cp : '') : '' ) + ')';
 
 		const skinMatches = [...document.body.className.matchAll(/skin-([a-z]+(?:-[0-9]+)?)/g)];
 		const skin = Array.from(new Set(skinMatches.map(match => match[1])));
