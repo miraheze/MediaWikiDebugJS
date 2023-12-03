@@ -172,7 +172,7 @@ function checkHtmlHead() {
 
 function handleApiResponse(data, targetElement) {
 	const jobs = data?.query?.statistics?.jobs;
-	if (jobs) {
+	if (jobs || jobs === 0) {
 		const caption = 'Queued Jobs: ' + jobs;
 
 		const liJobsElement = document.createElement('li');
