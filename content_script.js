@@ -1,6 +1,7 @@
 // In the format of: 'hostname': 'selector'
-// Add more wiki farms as needed
+// Add more wiki farms as needed (alphabetical order)
 const WIKI_FARMS = {
+	'editthis.info': 'editthis.info',
 	'fandom.com': 'static.wikia.nocookie.net',
 	'inside.wf': 'static.wikiforge.net',
 	'miraheze.org': 'matomo.miraheze.org',
@@ -40,6 +41,24 @@ function getMediaWikiVariable(variable) {
 	}
 }
 
+async function getBackendResponseTime() {
+	const respTime = getMediaWikiVariable('wgBackendResponseTime');
+	if (respTime) {
+		return respTime;
+	}
+
+	const sendDate = new Date().getTime();
+	return fetch(window.location.href)
+		.then(function(response) {
+			const receiveDate = new Date().getTime();
+			const responseTimeMs = receiveDate - sendDate;
+			return Promise.resolve(responseTimeMs);
+		})
+		.catch(function(error) {
+			console.log('Could not fetch URL: ' + window.location.href);
+		});
+}
+
 function parseHttpHeaders(httpHeaders) {
 	return httpHeaders.split("\n").map(function (x) {
 		return x.split(/: */, 2);
@@ -59,6 +78,24 @@ function getXservedBy(headers) {
 	}
 
 	return '';
+}
+
+function getBackendResponseTime() {
+	const respTime = getMediaWikiVariable('wgBackendResponseTime');
+	if (respTime) {
+		return respTime;
+	}
+
+	const sendDate = new Date().getTime();
+	fetch(window.location.href)
+  		.then(function(response) {
+    			const receiveDate = new Date().getTime();
+    			const responseTimeMs = receiveDate - sendDate;
+			return responseTimeMs;
+		})
+		.catch(function(error) {
+			console.log('Could not fetch URL: ' + window.location.href);
+		});
 }
 
 // If it has matomo, we can try to use that to
@@ -94,7 +131,7 @@ function getDBName() {
 	return getDBNameFromMatomoScript();
 }
 
-function checkHtmlHead() {
+async function checkHtmlHead() {
 	const headContent = document.head.innerHTML;
 
 	const includesAnyOf = (string, substrings) => {
@@ -115,7 +152,7 @@ function checkHtmlHead() {
 
 	xhr.onload = function () {
 		const headers = parseHttpHeaders(xhr.getAllResponseHeaders()),
-			respTime = getMediaWikiVariable('wgBackendResponseTime'),
+			respTime = getMediaWikiVariable('wgBackendResponseTime') || await getBackendResponseTime(),
 			backendHeader = headers['x-powered-by'],
 			backend = backendHeader ? `PHP${backendHeader.replace(/^PHP\/([0-9]+).*/, '$1')}` : 'PHP',
 			server = getMediaWikiVariable('wgHostname') ? getMediaWikiVariable('wgHostname').replace(new RegExp('.' + matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), '') : '',
