@@ -119,7 +119,7 @@ function checkHtmlHead() {
 			backendHeader = headers['x-powered-by'],
 			backend = backendHeader ? `PHP${backendHeader.replace(/^PHP\/([0-9]+).*/, '$1')}` : 'PHP',
 			server = getMediaWikiVariable('wgHostname') ? getMediaWikiVariable('wgHostname').replace(new RegExp('.' + matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), '') : '',
-			cp = getXservedBy(headers).replace(new RegExp('.' + matchingWikiFarms.reverse()[0][0] + '|^mw[0-9]+|^test[0-9]+|\\s', 'g'), ''),
+			cp = getXservedBy(headers).replace(new RegExp('.' + matchingWikiFarms.reverse()[0][0] + '|' + backendHeader + '|^cache-yvr|^mw[0-9]+|^test[0-9]+|\\s', 'g'), ''),
 			dbname = getDBName() || '',
 			info = respTime.toString() + 'ms (<b>' + backend + '</b> via ' + dbname + (server || cp ? (dbname ? '@' : '') + server : '') + (cp ? (server ? ' / ' : '') + cp : '') + ')';
 
