@@ -138,7 +138,7 @@ function checkHtmlHead() {
 			backendHeader = headers['x-powered-by'],
 			backend = backendHeader ? `PHP${backendHeader.replace(/^PHP\/([0-9]+).*/, '$1')}` : 'PHP',
 			server = getMediaWikiVariable('wgHostname') ? getMediaWikiVariable('wgHostname').replace(new RegExp('.' + matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), '') : '',
-			cp = getXservedBy(headers).replace(new RegExp('.' + matchingWikiFarms.map(([wikiFarm]) => wikiFarm).join('|') + '|cache-(yvr|den)|^mw[0-9]+|^test[0-9]+|\\s', 'g'), ''),
+			cp = getXservedBy(headers).replace(new RegExp('.' + matchingWikiFarms.map(([wikiFarm]) => wikiFarm).join('|') + '|cache-(yvr|den|bfi-krnt)|^mw[0-9]+|^test[0-9]+|\\s', 'g'), ''),
 			dbname = getDBName() || '',
 			info = `${respTime}ms (<b>${backend.trim()}</b>${(dbname || server || cp) ? ` via ${dbname}${server || cp ? `${dbname ? '@' : ''}${server}` : ''}${cp ? `${server ? ' / ' : ''}${cp}` : ''}` : ''})`;
 
