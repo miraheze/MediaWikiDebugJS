@@ -98,8 +98,14 @@ function getDBNameFromMatomoScript() {
 	return setDocumentTitleMatch ? setDocumentTitleMatch[1] : null;
 }
 
+function getDBNameFromComment() {
+	const dbNameRegex = /Saved in parser cache with key\s*([\w:]+?)\s*:/;
+	const match = document.documentElement.outerHTML.match(dbNameRegex);
+	return match ? match[1] : null;
+}
+
 function getDBName() {
-	const wgDBname = getMediaWikiVariable('wgDBname') || getMediaWikiVariable('wikiDbName');
+	const wgDBname = getMediaWikiVariable('wgDBname') || getMediaWikiVariable('wikiDbName') || getDBNameFromComment();
 	if (wgDBname) {
 		return wgDBname;
 	}
