@@ -74,43 +74,10 @@ async function getBackendResponseTime() {
 	}
 }
 
-// If it has matomo, we can try to use that to
-// extract wiki database name
-function getMatomoScript() {
-	const scripts = document.querySelectorAll('script');
-	for (const script of scripts) {
-		const scriptContent = script.textContent;
-		if (scriptContent.includes('matomo.js') && scriptContent.includes('setDocumentTitle')) {
-			return scriptContent;
-		}
-	}
-
-	return null;
-}
-
-function getDBNameFromMatomoScript() {
-	const matomoScript = getMatomoScript();
-	if (!matomoScript) {
-		return null;
-	}
-
-	const setDocumentTitleMatch = matomoScript.match(/_paq.push\(\['setDocumentTitle', "(.+?)".+?\]\)/);
-	return setDocumentTitleMatch ? setDocumentTitleMatch[1] : null;
-}
-
-function getDBNameFromComment() {
+function getDBName() {
 	const dbNameRegex = /Saved in parser cache with key\s*([\w:]+?)\s*:/;
 	const match = document.documentElement.outerHTML.match(dbNameRegex);
 	return match ? match[1] : null;
-}
-
-function getDBName() {
-	const wgDBname = getMediaWikiVariable('wgDBname') || getMediaWikiVariable('wikiDbName') || getDBNameFromComment();
-	if (wgDBname) {
-		return wgDBname;
-	}
-
-	return getDBNameFromMatomoScript();
 }
 
 function checkHtmlHead() {
