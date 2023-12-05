@@ -74,6 +74,8 @@ async function getBackendResponseTime() {
 	}
 }
 
+// If it has matomo, we can try to use that to
+// extract wiki database name
 function getMatomoScript() {
 	const scripts = document.querySelectorAll('script');
 	for (const script of scripts) {
