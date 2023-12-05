@@ -26,27 +26,22 @@ const SKIN_SELECTORS = {
 const cache = {};
 const cacheDuration = 1000 * 60 * 5; // 5 minutes
 
-// Equivalent to `mw.config.get('variable')`. We have to scrape the value
-// from the script source because Chrome extension content scripts do not share
-// an execution environment with other JavaScript code.
 function getMediaWikiVariable(variable) {
 	const nodes = document.querySelectorAll('script');
-	var i, match;
+	let match;
 
-	for (i = 0; i < nodes.length; i++) {
-		match = new RegExp('"' + variable + '":\\s*"?([^("|}|,)]+)"?').exec(nodes[i].innerText);
+	for (const node of nodes) {
+		match = new RegExp(`"${variable}":\\s*"?([^("|}|,)]+)"?`).exec(node.innerText);
 		if (match) {
 			return match[1];
 		}
 	}
+
+	return null;
 }
 
 function parseHttpHeaders(httpHeaders) {
-	return httpHeaders.split("\n").map(function (x) {
-		return x.split(/: */, 2);
-	}).filter(function (x) {
-		return x[0];
-	}).reduce(function (ac, x) {
+	return httpHeaders.split("\n").map(x => x.split(/: */, 2)).filter(x => x[0]).reduce((ac, x) => {
 		ac[x[0]] = x[1];
 		return ac;
 	}, {});
@@ -69,15 +64,14 @@ async function getBackendResponseTime() {
 	}
 
 	const sendDate = new Date().getTime();
-	return fetch(window.location.href)
-		.then(function(response) {
-			const receiveDate = new Date().getTime();
-			const responseTimeMs = receiveDate - sendDate;
-			return Promise.resolve(responseTimeMs);
-		})
-		.catch(function(error) {
-			console.log('Could not fetch URL: ' + window.location.href);
-		});
+	try {
+		const response = await fetch(window.location.href);
+		const receiveDate = new Date().getTime();
+		const responseTimeMs = receiveDate - sendDate;
+		return Promise.resolve(responseTimeMs);
+	} catch (error) {
+		console.log('Could not fetch URL:', window.location.href);
+	}
 }
 
 // If it has matomo, we can try to use that to
@@ -120,13 +114,9 @@ function checkHtmlHead() {
 
 	const headContent = document.head.innerHTML;
 
-	const includesAnyOf = (string, substrings) => {
-		return substrings.some((substring) => string.includes(substring));
-	};
+	const includesAnyOf = (string, substrings) => substrings.some(substring => string.includes(substring));
 
-	const matchingWikiFarms = Object.entries(WIKI_FARMS).filter(([_, selector]) => {
-		return includesAnyOf(headContent, [selector]);
-	});
+	const matchingWikiFarms = Object.entries(WIKI_FARMS).filter(([_, selector]) => includesAnyOf(headContent, [selector]));
 
 	if (matchingWikiFarms.length === 0) {
 		return; // No matching wiki farms found in the HTML head
@@ -142,9 +132,9 @@ function checkHtmlHead() {
 			backendHeader = headers['x-powered-by'],
 			backend = backendHeader ? `PHP${backendHeader.replace(/^PHP\/([0-9]+).*/, '$1')}` : 'PHP',
 			server = getMediaWikiVariable('wgHostname') ? getMediaWikiVariable('wgHostname').replace(new RegExp('.' + matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), '') : '',
-			cp = getXservedBy(headers).replace(new RegExp('.' + matchingWikiFarms.map(wikiFarm => wikiFarm[0]).join('|') + '|cache-(yvr|den)|^mw[0-9]+|^test[0-9]+|\\s', 'g'), ''),
+			cp = getXservedBy(headers).replace(new RegExp('.' + matchingWikiFarms.map(([wikiFarm]) => wikiFarm).join('|') + '|cache-(yvr|den)|^mw[0-9]+|^test[0-9]+|\\s', 'g'), ''),
 			dbname = getDBName() || '',
-			info = respTime.toString() + 'ms (<b>' + backend.trim() + '</b>' + ( ( dbname || server || cp ) ? ' via ' + dbname + (server || cp ? (dbname ? '@' : '') + server : '') + (cp ? (server ? ' / ' : '') + cp : '') : '' ) + ')';
+			info = `${respTime}ms (<b>${backend.trim()}</b>${(dbname || server || cp) ? ` via ${dbname}${server || cp ? `${dbname ? '@' : ''}${server}` : ''}${cp ? `${server ? ' / ' : ''}${cp}` : ''}` : ''})`;
 
 		const skinMatches = [...document.body.className.matchAll(/skin-([a-z]+(?:-[0-9]+)?)/g)];
 		const skin = Array.from(new Set(skinMatches.map(match => match[1])));
@@ -168,24 +158,23 @@ function checkHtmlHead() {
 		if (cache.hasOwnProperty(apiUrl) && (Date.now() - cache[apiUrl].timestamp) < cacheDuration) {
 			handleApiResponse(cache[apiUrl].data, targetElement);
 		} else {
-			fetchData(apiUrl, function (data) {
+			fetchData(apiUrl, data => {
 				cache[apiUrl] = {
-					data: data,
+					data,
 					timestamp: Date.now(),
 				};
 				handleApiResponse(data, targetElement);
 			})
-			.catch(function () {
-				// If an error occurs with the primary URL, try the fallback URL
+			.catch(() => {
 				console.log('Error fetching data from API URL. Trying fallback.');
-				fetchData(fallbackApiUrl, function (fallbackData) {
+				fetchData(fallbackApiUrl, fallbackData => {
 					cache[apiUrl] = {
 						data: fallbackData,
 						timestamp: Date.now(),
 					};
 					handleApiResponse(fallbackData, targetElement);
 				})
-				.catch(function (fallbackError) {
+				.catch(fallbackError => {
 					console.log('Error fetching data from fallback API URL.');
 				});
 			});
@@ -196,7 +185,7 @@ function checkHtmlHead() {
 function handleApiResponse(data, targetElement) {
 	const jobs = data?.query?.statistics?.jobs;
 	if (jobs || jobs === 0) {
-		const caption = 'Queued Jobs: ' + jobs;
+		const caption = `Queued Jobs: ${jobs}`;
 
 		const liJobsElement = document.createElement('li');
 		liJobsElement.innerHTML = caption;
@@ -213,17 +202,17 @@ function fetchData(url, callback) {
 		format: 'json',
 	};
 
-	return fetch(url + '?' + new URLSearchParams(params))
-		.then(function (response) {
+	return fetch(`${url}?${new URLSearchParams(params)}`)
+		.then(response => {
 			if (!response.ok) {
 				throw new Error('Network response was not ok');
 			}
 			return response.json();
 		})
-		.then(function (data) {
+		.then(data => {
 			callback(data);
 		})
-		.catch(function (error) {
+		.catch(error => {
 			console.log(`Error fetching data from ${url}.`);
 			throw error;
 		});
