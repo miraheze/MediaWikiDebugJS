@@ -172,7 +172,7 @@ function checkHtmlHead() {
 				handleApiResponse(data, targetElement);
 			})
 			.catch(() => {
-				console.log('Error fetching data from API URL. Trying fallback.');
+				console.log(`Trying fallback URL: ${fallbackApiUrl}`);
 				fetchData(fallbackApiUrl, fallbackData => {
 					cache[apiUrl] = {
 						data: fallbackData,
