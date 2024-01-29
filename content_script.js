@@ -1,15 +1,14 @@
-// In the format of: 'hostname': 'selector'
+// In the format of: 'hostname': [ 'selector1', 'selector2', ... ]
 // Add more wiki farms as needed (alphabetical order)
 const WIKI_FARMS = {
-	'editthis.info': 'editthis.info',
-	'fandom.com': 'static.wikia.nocookie.net',
-	'inside.wf': 'static.wikiforge.net',
-	'miraheze.org': 'matomo.miraheze.org',
-	'shoutwiki-servers.com': 'www.shoutwiki.com',
-	'telepedia.net': 'static.telepedia.net',
-	'wikimedia.org': 'upload.wikimedia.org',
-	'wikitide.net': 'analytics.wikitide.net',
-	'wiki.gg': 'app.wiki.gg',
+	'editthis.info': [ 'editthis.info' ],
+	'fandom.com': [ 'static.wikia.nocookie.net' ],
+	'inside.wf': [ 'static.wikiforge.net' ],
+	'shoutwiki-servers.com': [ 'www.shoutwiki.com' ],
+	'telepedia.net': [ 'static.telepedia.net' ],
+	'wikimedia.org': [ 'upload.wikimedia.org' ],
+	'wikitide.net': [ 'matomo.miraheze.org', 'analytics.wikitide.net' ],
+	'wiki.gg': [ 'app.wiki.gg' ],
 };
 
 // In the format of: skinname: 'selector'
@@ -122,7 +121,9 @@ function checkHtmlHead() {
 
 	const includesAnyOf = (string, substrings) => substrings.some(substring => string.includes(substring));
 
-	const matchingWikiFarms = Object.entries(WIKI_FARMS).filter(([_, selector]) => includesAnyOf(headContent, [selector]));
+	const matchingWikiFarms = Object.entries(WIKI_FARMS).filter(([_, selectors]) =>
+		selectors.some(selector => includesAnyOf(headContent, [selector]))
+	);
 
 	if (matchingWikiFarms.length === 0) {
 		return; // No matching wiki farms found in the HTML head
