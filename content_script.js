@@ -225,4 +225,6 @@ function fetchData(url, callback) {
 		});
 }
 
-window.onload = checkHtmlHead();
+document.addEventListener('DOMContentLoaded', () => {
+	checkHtmlHead();
+});
