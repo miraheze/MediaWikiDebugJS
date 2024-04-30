@@ -14,14 +14,6 @@
 		"default_title": "MediaWikiDebugJS",
 		"default_popup": "popup.html"
 	},
-	"content_scripts": [
-		{
-			"matches": [
-				"<all_urls>"
-			],
-			"js": ["content_script.js"]
-		}
-	],
 	"permissions": [
 		"activeTab",
 		"scripting",
