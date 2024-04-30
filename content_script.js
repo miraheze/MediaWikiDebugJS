@@ -112,7 +112,13 @@ function getDBName() {
 	return getDBNameFromMatomoScript();
 }
 
+let isCheckHtmlHeadLoaded = false;
+
 function checkHtmlHead() {
+	if (isCheckHtmlHeadLoaded) {
+		return; // already done
+	}
+
 	if (!document.body.classList.contains('mediawiki')) {
 		return;
 	}
@@ -187,6 +193,8 @@ function checkHtmlHead() {
 			});
 		}
 	};
+
+	isCheckHtmlHeadLoaded = true;
 }
 
 function handleApiResponse(data, targetElement) {
@@ -225,6 +233,7 @@ function fetchData(url, callback) {
 		});
 }
 
+window.onload = checkHtmlHead();
 document.addEventListener('DOMContentLoaded', () => {
 	checkHtmlHead();
 });
