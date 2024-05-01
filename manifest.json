@@ -7,9 +7,6 @@
 	"icons": {
 		"512": "logo.png"
 	},
-	"background": {
-		"service_worker": "background.js"
-	},
 	"action": {
 		"default_title": "MediaWikiDebugJS",
 		"default_popup": "popup.html"
