@@ -145,9 +145,9 @@ function checkHtmlHead() {
 			backendHeader = headers['x-powered-by'],
 			backend = backendHeader ? `PHP${backendHeader.replace(/^PHP\/([0-9]+).*/, '$1')}` : 'PHP',
 			server = getMediaWikiVariable('wgHostname') ? getMediaWikiVariable('wgHostname').replace(new RegExp('.' + matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), '') : '',
-			cp = getXservedBy(headers).replace(new RegExp('.' + matchingWikiFarms.map(([wikiFarm]) => wikiFarm).join('|') + '|cache-(yvr|den|bfi-krnt|lcy-eglc)|^mw[0-9]+|^test[0-9]+|\\s', 'g'), ''),
+			servedby = getXservedBy(headers).replace(new RegExp('.' + matchingWikiFarms.map(([wikiFarm]) => wikiFarm).join('|') + '|cache-(yvr|den|bfi-krnt|lcy-eglc)|^mw[0-9]+|^test[0-9]+|\\s', 'g'), '').replace(/\.$/, ''),
 			dbname = getDBName() || '',
-			info = `${respTime}ms (<b>${backend.trim()}</b>${(dbname || server || cp) ? ` via ${dbname}${server || cp ? `${dbname ? '@' : ''}${server}` : ''}${cp ? `${server ? ' / ' : ''}${cp}` : ''}` : ''})`;
+			info = `${respTime}ms (<b>${backend.trim()}</b>${(dbname || server || servedby) ? ` via ${dbname}${server || servedby ? `${dbname ? '@' : ''}${server}` : ''}${servedby ? `${server ? ' / ' : ''}${servedby}` : ''}` : ''})`;
 
 		const skinMatches = [...document.body.className.matchAll(/skin-([a-z]+(?:-[0-9]+)?)/g)];
 		const skin = Array.from(new Set(skinMatches.map(match => match[1])));
