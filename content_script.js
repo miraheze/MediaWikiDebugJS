@@ -7,7 +7,7 @@ const WIKI_FARMS = {
 	'shoutwiki-servers.com': [ 'www.shoutwiki.com' ],
 	'telepedia.net': [ 'static.telepedia.net' ],
 	'wikimedia.org': [ 'upload.wikimedia.org' ],
-	'wikitide.net': [ 'static.miraheze.org', 'analytics.wikitide.net', 'static.wikitide.net' ],
+	'wikitide.net': [ 'static.miraheze.org', 'analytics.wikitide.net' ],
 	'wiki.gg': [ 'app.wiki.gg' ],
 };
 
