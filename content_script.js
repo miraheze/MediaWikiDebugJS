@@ -19,6 +19,7 @@ const SKIN_SELECTORS = {
 	cosmos: '#p-tb ul',
 	fandomdesktop: '.page-footer',
 	minerva: 'ul#p-personal',
+	refreshed: '#mw-content-text',
 	'vector-2022': '.mw-content-container',
 	default: '#p-personal ul',
 };
