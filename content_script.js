@@ -6,6 +6,7 @@ const WIKI_FARMS = {
 	'inside.wf': [ 'static.wikiforge.net' ],
 	'shoutwiki-servers.com': [ 'www.shoutwiki.com' ],
 	'telepedia.net': [ 'static.telepedia.net' ],
+	'weirdgloop.org': [ 'weirdgloop.org' ],
 	'wikimedia.org': [ 'upload.wikimedia.org' ],
 	'wikitide.net': [ 'static.miraheze.org', 'analytics.wikitide.net' ],
 	'wiki.gg': [ 'app.wiki.gg' ],
@@ -112,10 +113,10 @@ function getDBName() {
 	return getDBNameFromMatomoScript();
 }
 
-let isCheckHtmlHeadLoaded = false;
+let isCheckHtmlLoaded = false;
 
-function checkHtmlHead() {
-	if (isCheckHtmlHeadLoaded) {
+function checkHtml() {
+	if (isCheckHtmlLoaded) {
 		return; // already done
 	}
 
@@ -123,12 +124,18 @@ function checkHtmlHead() {
 		return;
 	}
 
-	const headContent = document.head.innerHTML;
+	const headContent = document.head.innerHTML,
+		footerContent = document.body.getElementsByTagName('footer')[0].innerHTML;
+
+	let checkContent = headContent;
+	if (footerContent) {
+		checkContent = headContent + footerContent;
+	}
 
 	const includesAnyOf = (string, substrings) => substrings.some(substring => string.includes(substring));
 
 	const matchingWikiFarms = Object.entries(WIKI_FARMS).filter(([_, selectors]) =>
-		selectors.some(selector => includesAnyOf(headContent, [selector]))
+		selectors.some(selector => includesAnyOf(checkContent, [selector]))
 	);
 
 	if (matchingWikiFarms.length === 0) {
@@ -194,7 +201,7 @@ function checkHtmlHead() {
 		}
 	};
 
-	isCheckHtmlHeadLoaded = true;
+	isCheckHtmlLoaded = true;
 }
 
 function handleApiResponse(data, targetElement) {
@@ -233,7 +240,7 @@ function fetchData(url, callback) {
 		});
 }
 
-window.onload = checkHtmlHead();
+window.onload = checkHtml();
 document.addEventListener('DOMContentLoaded', () => {
-	checkHtmlHead();
+	checkHtml();
 });
