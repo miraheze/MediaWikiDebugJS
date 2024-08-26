@@ -5,11 +5,14 @@ const WIKI_FARMS = {
 	'editthis.info': [ 'editthis.info' ],
 	'fandom.com': [ 'static.wikia.nocookie.net' ],
 	'inside.wf': [ 'static.wikiforge.net' ],
+	'liquipedia.net': [ 'liquipedia.net' ],
+	'paradoxwikis.com': [ 'central.paradoxwikis.com' ],
 	'shoutwiki-servers.com': [ 'www.shoutwiki.com' ],
 	'telepedia.net': [ 'static.telepedia.net' ],
 	'weirdgloop.org': [ 'weirdgloop.org' ],
 	'wikimedia.org': [ 'upload.wikimedia.org' ],
 	'wikitide.net': [ 'static.miraheze.org', 'analytics.wikitide.net' ],
+	'wiki.biligame.com': [ 'static.hdslb.com' ],
 	'wiki.gg': [ 'app.wiki.gg' ],
 };
 
