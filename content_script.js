@@ -1,6 +1,7 @@
 // In the format of: 'hostname': [ 'selector1', 'selector2', ... ]
 // Add more wiki farms as needed (alphabetical order)
 const WIKI_FARMS = {
+	'abxy.org': [ 'cdn.wikimg.net' ],
 	'editthis.info': [ 'editthis.info' ],
 	'fandom.com': [ 'static.wikia.nocookie.net' ],
 	'inside.wf': [ 'static.wikiforge.net' ],
@@ -136,7 +137,7 @@ function checkHtml() {
 	const includesAnyOf = (string, substrings) => substrings.some(substring => string.includes(substring));
 
 	const matchingWikiFarms = Object.entries(WIKI_FARMS).filter(([_, selectors]) =>
-		selectors.some(selector => includesAnyOf(checkContent, [selector]))
+		includesAnyOf(checkContent, selectors)
 	);
 
 	if (matchingWikiFarms.length === 0) {
