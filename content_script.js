@@ -11,7 +11,7 @@ const WIKI_FARMS = {
 	'telepedia.net': [ 'static.telepedia.net' ],
 	'weirdgloop.org': [ 'weirdgloop.org' ],
 	'wikimedia.org': [ 'upload.wikimedia.org' ],
-	'wikitide.net': [ 'static.miraheze.org', 'analytics.wikitide.net' ],
+	'wikitide.net': [ 'static.wikitide.net', 'analytics.wikitide.net' ],
 	'wiki.biligame.com': [ 'static.hdslb.com' ],
 	'wiki.gg': [ 'app.wiki.gg' ],
 };
