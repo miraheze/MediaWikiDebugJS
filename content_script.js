@@ -1,5 +1,4 @@
-// In the format of: 'hostname': [ 'selector1', 'selector2', ... ]
-// Add more wiki farms as needed (alphabetical order)
+// Wiki farms mapping: 'hostname': [ 'selector1', 'selector2', ... ]
 const WIKI_FARMS = {
 	'abxy.org': [ 'cdn.wikimg.net' ],
 	'editthis.info': [ 'editthis.info' ],
@@ -16,8 +15,7 @@ const WIKI_FARMS = {
 	'wiki.gg': [ 'app.wiki.gg' ],
 };
 
-// In the format of: skinname: 'selector'
-// Add more skin selectors as needed
+// Skin selectors mapping: 'skinname': 'selector'
 const SKIN_SELECTORS = {
 	citizen: '.citizen-footer__siteinfo',
 	cosmos: '#p-tb ul',
@@ -28,224 +26,166 @@ const SKIN_SELECTORS = {
 	default: '#p-personal ul',
 };
 
+const CACHE_DURATION = 1000 * 60 * 5; // 5 minutes
 const cache = {};
-const cacheDuration = 1000 * 60 * 5; // 5 minutes
 
 function getMediaWikiVariable(variable) {
-	const nodes = document.querySelectorAll('script');
-	let match;
-
-	for (const node of nodes) {
-		match = new RegExp(`"${variable}":\\s*"?([^("|}|,)]+)"?`).exec(node.innerText);
-		if (match) {
-			return match[1];
-		}
+	const scriptNodes = [...document.querySelectorAll('script')];
+	for (const node of scriptNodes) {
+		const match = new RegExp(`"${variable}":\\s*"?([^("|}|,)]+)"?`).exec(node.innerText);
+		if (match) return match[1];
 	}
-
 	return null;
 }
 
 function parseHttpHeaders(httpHeaders) {
-	return httpHeaders.split("\n").map(x => x.split(/: */, 2)).filter(x => x[0]).reduce((ac, x) => {
-		ac[x[0]] = x[1];
-		return ac;
-	}, {});
+	return Object.fromEntries(
+		httpHeaders.split("\n")
+			.map(line => line.split(/: */, 2))
+			.filter(pair => pair[0])
+	);
 }
 
 function getXservedBy(headers) {
 	const xservedByHeader = headers['x-datacenter'] || headers['x-served-by'];
-	if (xservedByHeader) {
-		const xservedByValues = xservedByHeader.split(',');
-		return xservedByValues.length > 1 ? xservedByValues[1] : xservedByValues[0];
-	}
-
-	return '';
+	return xservedByHeader ? xservedByHeader.split(',').pop() : '';
 }
 
 async function getBackendResponseTime() {
 	const respTime = getMediaWikiVariable('wgBackendResponseTime');
-	if (respTime) {
-		return respTime;
-	}
+	if (respTime) return respTime;
 
-	const sendDate = new Date().getTime();
+	const sendDate = Date.now();
 	try {
-		const response = await fetch(window.location.href);
-		const receiveDate = new Date().getTime();
-		const responseTimeMs = receiveDate - sendDate;
-		return Promise.resolve(responseTimeMs);
-	} catch (error) {
-		console.log('Could not fetch URL:', window.location.href);
+		await fetch(window.location.href);
+		return Date.now() - sendDate;
+	} catch {
+		console.warn('Could not fetch URL:', window.location.href);
+		return null;
 	}
 }
 
-// If it has matomo, we can try to use that to
-// extract wiki database name
 function getMatomoScript() {
-	const scripts = document.querySelectorAll('script');
-	for (const script of scripts) {
-		const scriptContent = script.textContent;
-		if (scriptContent.includes('matomo.js') && scriptContent.includes('setDocumentTitle')) {
-			return scriptContent;
-		}
-	}
-
-	return null;
+	return [...document.querySelectorAll('script')].find(script =>
+		script.textContent.includes('matomo.js') && script.textContent.includes('setDocumentTitle')
+	)?.textContent || null;
 }
 
 function getDBNameFromMatomoScript() {
 	const matomoScript = getMatomoScript();
-	if (!matomoScript) {
-		return null;
-	}
-
-	const setDocumentTitleMatch = matomoScript.match(/_paq.push\(\['setDocumentTitle', "(.+?)".+?\]\)/);
-	return setDocumentTitleMatch ? setDocumentTitleMatch[1] : null;
+	return matomoScript?.match(/_paq.push\(\['setDocumentTitle', "(.+?)".+?\]\)/)?.[1] || null;
 }
 
 function getDBNameFromComment() {
-	const dbNameRegex = /Saved in parser cache with key\s*([\w:]+?)\s*:/;
-	const match = document.documentElement.outerHTML.match(dbNameRegex);
-	return match ? match[1] : null;
+	return document.documentElement.outerHTML.match(/Saved in parser cache with key\s*([\w:]+?)\s*:/)?.[1] || null;
 }
 
 function getDBName() {
-	const wgDBname = getMediaWikiVariable('wgDBname') || getMediaWikiVariable('wikiDbName') || getDBNameFromComment();
-	if (wgDBname) {
-		return wgDBname;
-	}
-
-	return getDBNameFromMatomoScript();
+	return getMediaWikiVariable('wgDBname') ||
+		getMediaWikiVariable('wikiDbName') ||
+		getDBNameFromComment() ||
+		getDBNameFromMatomoScript();
 }
 
 let isCheckHtmlLoaded = false;
 
 function checkHtml() {
-	if (isCheckHtmlLoaded) {
-		return; // already done
-	}
+	if (isCheckHtmlLoaded || !document.body.classList.contains('mediawiki')) return;
 
-	if (!document.body.classList.contains('mediawiki')) {
-		return;
-	}
-
-	const headContent = document.head.innerHTML,
-		footerContent = document.body.getElementsByTagName('footer')[0].innerHTML;
-
-	let checkContent = headContent;
-	if (footerContent) {
-		checkContent = headContent + footerContent;
-	}
-
-	const includesAnyOf = (string, substrings) => substrings.some(substring => string.includes(substring));
+	const headContent = document.head.innerHTML;
+	const footerContent = document.querySelector('footer')?.innerHTML || '';
+	const contentToCheck = headContent + footerContent;
 
 	const matchingWikiFarms = Object.entries(WIKI_FARMS).filter(([_, selectors]) =>
-		includesAnyOf(checkContent, selectors)
+		selectors.some(selector => contentToCheck.includes(selector))
 	);
 
-	if (matchingWikiFarms.length === 0) {
-		return; // No matching wiki farms found in the HTML head
-	}
+	if (!matchingWikiFarms.length) return;
 
 	const xhr = new XMLHttpRequest();
 	xhr.open('HEAD', document.location);
 	xhr.send();
 
 	xhr.onload = async function () {
-		const headers = parseHttpHeaders(xhr.getAllResponseHeaders()),
-			respTime = getMediaWikiVariable('wgBackendResponseTime') || await getBackendResponseTime(),
-			backendHeader = headers['x-powered-by'],
-			backend = backendHeader ? `PHP${backendHeader.replace(/^PHP\/([0-9]+).*/, '$1')}` : 'PHP',
-			server = getMediaWikiVariable('wgHostname') ? getMediaWikiVariable('wgHostname').replace(new RegExp('.' + matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), '') : '',
-			servedby = getXservedBy(headers).replace(new RegExp('.' + matchingWikiFarms.map(([wikiFarm]) => wikiFarm).join('|') + '|cache-(yvr|den|bfi-krnt|lcy-eglc)|^mw[0-9]+|^test[0-9]+|\\s', 'g'), '').replace(/\.$/, ''),
-			dbname = getDBName() || '',
-			info = `${respTime}ms (<b>${backend.trim()}</b>${(dbname || server || servedby) ? ` via ${dbname}${server || servedby ? `${dbname ? '@' : ''}${server}` : ''}${servedby ? `${server ? ' / ' : ''}${servedby}` : ''}` : ''})`;
+		const headers = parseHttpHeaders(xhr.getAllResponseHeaders());
+		const responseTime = getMediaWikiVariable('wgBackendResponseTime') || await getBackendResponseTime();
+		const backendVersion = headers['x-powered-by']?.replace(/^PHP\/([0-9]+).*/, '$1') || 'PHP';
+		const server = getMediaWikiVariable('wgHostname')?.replace(
+			new RegExp('.' + matchingWikiFarms[0][0].replace(/\./g, '\\.') + '$'), ''
+		) || '';
+		const servedBy = getXservedBy(headers).replace(
+			new RegExp(`.${matchingWikiFarms.map(([farm]) => farm).join('|')}|cache-(yvr|den|bfi-krnt|lcy-eglc)|^mw[0-9]+|^test[0-9]+|\\s`, 'g'),
+			''
+		).replace(/\.$/, '');
+		const dbname = getDBName() || '';
 
-		const skinMatches = [...document.body.className.matchAll(/skin-([a-z]+(?:-[0-9]+)?)/g)];
-		const skin = Array.from(new Set(skinMatches.map(match => match[1])));
-		const skinName = skin ? skin[1] || skin[0] : '';
+		const info = `${responseTime}ms (<b>${backendVersion}</b>${
+			(dbname || server || servedBy) ? ` via ${dbname}${server ? `@${server}` : ''}${servedBy ? ` / ${servedBy}` : ''}` : ''
+		})`;
 
+		const skin = [...document.body.className.matchAll(/skin-([a-z]+(?:-[0-9]+)?)/g)].map(match => match[1]);
+		const skinName = skin[1] || skin[0] || '';
 		const skinSelector = SKIN_SELECTORS[skinName] || SKIN_SELECTORS['default'];
 
 		const targetElement = document.querySelector(skinSelector);
-		if (!targetElement) {
-			return; // No matching target element found for the skin selector
-		}
+		if (!targetElement) return;
 
-		const liInfoElement = document.createElement('li');
-		liInfoElement.innerHTML = info;
+		const infoElement = document.createElement('li');
+		infoElement.innerHTML = info;
+		targetElement.appendChild(infoElement);
 
-		targetElement.appendChild(liInfoElement);
-
-		const apiUrl = '/w/api.php';
-		const fallbackApiUrl = '/api.php';
-
-		if (cache.hasOwnProperty(apiUrl) && (Date.now() - cache[apiUrl].timestamp) < cacheDuration) {
-			handleApiResponse(cache[apiUrl].data, targetElement);
-		} else {
-			fetchData(apiUrl, data => {
-				cache[apiUrl] = {
-					data,
-					timestamp: Date.now(),
-				};
-				handleApiResponse(data, targetElement);
-			})
-			.catch(() => {
-				console.log(`Trying fallback URL: ${fallbackApiUrl}`);
-				fetchData(fallbackApiUrl, fallbackData => {
-					cache[apiUrl] = {
-						data: fallbackData,
-						timestamp: Date.now(),
-					};
-					handleApiResponse(fallbackData, targetElement);
-				})
-				.catch(fallbackError => {
-					console.log('Error fetching data from fallback API URL.');
-				});
-			});
-		}
+		fetchApiData(targetElement);
 	};
 
 	isCheckHtmlLoaded = true;
 }
 
+function fetchApiData(targetElement) {
+	const apiUrl = '/w/api.php';
+	const fallbackApiUrl = '/api.php';
+
+	if (cache[apiUrl] && (Date.now() - cache[apiUrl].timestamp) < CACHE_DURATION) {
+		handleApiResponse(cache[apiUrl].data, targetElement);
+		return;
+	}
+
+	fetchData(apiUrl)
+		.then(data => {
+			cache[apiUrl] = { data, timestamp: Date.now() };
+			handleApiResponse(data, targetElement);
+		})
+		.catch(() => {
+			console.warn(`Trying fallback URL: ${fallbackApiUrl}`);
+			fetchData(fallbackApiUrl)
+				.then(fallbackData => {
+					cache[apiUrl] = { data: fallbackData, timestamp: Date.now() };
+					handleApiResponse(fallbackData, targetElement);
+				})
+				.catch(() => console.error('Error fetching data from fallback API URL.'));
+		});
+}
+
 function handleApiResponse(data, targetElement) {
 	const jobs = data?.query?.statistics?.jobs;
 	if (jobs || jobs === 0) {
-		const caption = `Queued Jobs: ${jobs}`;
-
-		const liJobsElement = document.createElement('li');
-		liJobsElement.innerHTML = caption;
-
-		targetElement.appendChild(liJobsElement);
+		const jobsElement = document.createElement('li');
+		jobsElement.innerHTML = `Queued Jobs: ${jobs}`;
+		targetElement.appendChild(jobsElement);
 	}
 }
 
-function fetchData(url, callback) {
-	const params = {
+function fetchData(url) {
+	const params = new URLSearchParams({
 		action: 'query',
 		meta: 'siteinfo',
 		siprop: 'statistics',
 		format: 'json',
-	};
+	});
 
-	return fetch(`${url}?${new URLSearchParams(params)}`)
-		.then(response => {
-			if (!response.ok) {
-				throw new Error('Network response was not ok');
-			}
-			return response.json();
-		})
-		.then(data => {
-			callback(data);
-		})
-		.catch(error => {
-			console.log(`Error fetching data from ${url}.`);
-			throw error;
-		});
+	return fetch(`${url}?${params}`)
+		.then(response => response.ok ? response.json() : Promise.reject('Network response not ok'))
+		.catch(() => Promise.reject(`Error fetching data from ${url}`));
 }
 
-window.onload = checkHtml();
-document.addEventListener('DOMContentLoaded', () => {
-	checkHtml();
-});
+window.addEventListener('load', checkHtml);
+document.addEventListener('DOMContentLoaded', checkHtml);
