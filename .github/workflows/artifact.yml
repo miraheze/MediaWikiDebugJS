@@ -60,6 +60,8 @@ jobs:
           VERSION=$(jq -r '.version' dist/chrome/manifest.json)
 
           web-ext build --source-dir=dist/chrome --overwrite-dest --artifacts-dir=dist/chrome
+          # Due to case-sensitivity, we rename twice
+          mv dist/chrome/*.zip dist/chrome/$VERSION-$EXT_NAME.zip
           mv dist/chrome/*.zip dist/chrome/$EXT_NAME-$VERSION.zip
 
       - name: Upload Chrome Artifacts
