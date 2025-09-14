@@ -10,7 +10,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     env:
-      EXT_NAME: mediawikidebugjs
+      EXT_NAME: MediaWikiDebugJS
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -27,7 +27,8 @@ jobs:
         run: |
           mkdir -p dist/firefox
           web-ext build --overwrite-dest --artifacts-dir=dist/firefox
-          mv dist/firefox/*.zip dist/firefox/$EXT_NAME.xpi
+          VERSION=$(jq -r '.version' manifest.json)
+          mv dist/firefox/*.zip dist/firefox/$EXT_NAME-$VERSION.xpi
 
       - name: Build & Sign Firefox XPI
         env:
@@ -48,7 +49,8 @@ jobs:
             rm -f dist/firefox-signed/*.xpi
           else
             # Rename signed XPI to include the actual extension name and "-signed"
-            mv dist/firefox-signed/*.xpi dist/firefox-signed/$EXT_NAME-signed.xpi
+            VERSION=$(jq -r '.version' manifest.json)
+            mv dist/firefox-signed/*.xpi dist/firefox-signed/$EXT_NAME-$VERSION-signed.xpi
           fi
 
       - name: Build Chrome CRX and ZIP
@@ -58,12 +60,13 @@ jobs:
           # Remove Firefox-specific field from manifest
           jq 'del(.browser_specific_settings)' dist/chrome/manifest.json > dist/chrome/manifest.tmp.json
           mv dist/chrome/manifest.tmp.json dist/chrome/manifest.json
+          VERSION=$(jq -r '.version' dist/chrome/manifest.json)
 
           web-ext build --source-dir=dist/chrome --overwrite-dest --artifacts-dir=dist/chrome
+          mv dist/chrome/*.zip dist/chrome/$EXT_NAME-$VERSION.zip
 
           # Write secret key to file
           echo "${{ secrets.CRX_KEY }}" > dist/chrome/key.pem
-          VERSION=$(jq -r '.version' dist/chrome/manifest.json)
 
           crx3 pack dist/chrome \
             --output dist/chrome/$EXT_NAME-$VERSION.crx \
