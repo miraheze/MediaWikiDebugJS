@@ -9,6 +9,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      EXT_NAME: MediaWikiDebugJS
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -25,9 +27,8 @@ jobs:
         run: |
           mkdir -p dist/firefox
           web-ext build --overwrite-dest --artifacts-dir=dist/firefox
-          for f in dist/firefox/*.zip; do
-            mv "$f" "${f%.zip}.xpi"
-          done
+          VERSION=$(jq -r '.version' manifest.json)
+          mv dist/firefox/*.zip dist/firefox/$EXT_NAME-$VERSION.xpi
 
       - name: Build & Sign Firefox XPI
         env:
@@ -47,10 +48,9 @@ jobs:
             echo "Signing failed, probably version already exists. Skipping signed XPI."
             rm -f dist/firefox-signed/*.xpi
           else
-            # Rename signed XPI to include "-signed"
-            for f in dist/firefox-signed/*.xpi; do
-              mv "$f" "${f%.xpi}-signed.xpi"
-            done
+            # Rename signed XPI to include the actual extension name and "-signed"
+            VERSION=$(jq -r '.version' manifest.json)
+            mv dist/firefox-signed/*.xpi dist/firefox-signed/$EXT_NAME-$VERSION-signed.xpi
           fi
 
       - name: Build Chrome CRX and ZIP
@@ -60,12 +60,19 @@ jobs:
           # Remove Firefox-specific field from manifest
           jq 'del(.browser_specific_settings)' dist/chrome/manifest.json > dist/chrome/manifest.tmp.json
           mv dist/chrome/manifest.tmp.json dist/chrome/manifest.json
+          VERSION=$(jq -r '.version' dist/chrome/manifest.json)
+
           web-ext build --source-dir=dist/chrome --overwrite-dest --artifacts-dir=dist/chrome
+          mv dist/chrome/*.zip dist/chrome/$EXT_NAME-$VERSION.zip
+
           # Write secret key to file
           echo "${{ secrets.CRX_KEY }}" > dist/chrome/key.pem
-          VERSION=$(jq -r '.version' dist/chrome/manifest.json)
-          crx3 pack dist/chrome --output dist/chrome/mediawikidebugjs-$VERSION.crx --key dist/chrome/key.pem
-          mv web-extension.crx dist/chrome/mediawikidebugjs-$VERSION.crx
+
+          crx3 pack dist/chrome \
+            --output dist/chrome/$EXT_NAME-$VERSION.crx \
+            --key dist/chrome/key.pem
+
+          mv web-extension.crx dist/chrome/$EXT_NAME-$VERSION.crx
 
       - name: Create GitHub Release
         env:

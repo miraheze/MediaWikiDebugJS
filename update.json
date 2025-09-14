@@ -13,6 +13,10 @@
 				{
 					"version": "1.4.0",
 					"update_link": "https://github.com/miraheze/MediaWikiDebugJS/releases/download/v1.4.0/5838d82dcff54eb180b3-1.4.0-signed.xpi"
+				},
+				{
+					"version": "1.5.0",
+					"update_link": "https://github.com/miraheze/MediaWikiDebugJS/releases/download/v1.5.0/MediaWikiDebugJS-1.5.0-signed.xpi"
 				}
 			]
 		}
