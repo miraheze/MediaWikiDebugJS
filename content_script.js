@@ -116,7 +116,7 @@ function checkHtml() {
 	xhr.onload = async function () {
 		const headers = parseHttpHeaders( xhr.getAllResponseHeaders() );
 		const responseTime = getMediaWikiVariable( 'wgBackendResponseTime' ) || await getBackendResponseTime();
-		// const backendVersion = headers[ 'x-powered-by' ]?.replace( /^PHP\/([0-9]+).*/, '$1' ) || 'PHP';
+		// const _ = headers[ 'x-powered-by' ]?.replace( /^PHP\/([0-9]+).*/, '$1' ) || 'PHP';
 		const backendVersion = 'PHP8';
 		const server = getMediaWikiVariable( 'wgHostname' )?.replace(
 			// eslint-disable-next-line security/detect-non-literal-regexp
