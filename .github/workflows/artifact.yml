@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  EXT_NAME: MediaWikiDebugJS
+
 jobs:
   build-firefox:
     runs-on: ubuntu-latest
@@ -24,9 +27,8 @@ jobs:
         run: |
           mkdir -p dist/firefox
           web-ext build --overwrite-dest --artifacts-dir=dist/firefox
-          for f in dist/firefox/*.zip; do
-            mv "$f" "${f%.zip}.xpi"
-          done
+          VERSION=$(jq -r '.version' manifest.json)
+          mv dist/firefox/*.zip dist/firefox/$EXT_NAME-$VERSION.xpi
 
       - name: Upload Firefox Artifacts
         uses: actions/upload-artifact@v4
@@ -55,7 +57,10 @@ jobs:
           # Remove Firefox-specific field from manifest
           jq 'del(.browser_specific_settings)' dist/chrome/manifest.json > dist/chrome/manifest.tmp.json
           mv dist/chrome/manifest.tmp.json dist/chrome/manifest.json
+          VERSION=$(jq -r '.version' dist/chrome/manifest.json)
+
           web-ext build --source-dir=dist/chrome --overwrite-dest --artifacts-dir=dist/chrome
+          mv dist/chrome/*.zip dist/chrome/$EXT_NAME-$VERSION.zip
 
       - name: Upload Chrome Artifacts
         uses: actions/upload-artifact@v4
