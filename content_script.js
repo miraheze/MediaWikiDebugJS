@@ -3,7 +3,6 @@ const WIKI_FARMS = {
 	'abxy.org': [ 'cdn.wikimg.net' ],
 	'editthis.info': [ 'editthis.info' ],
 	'fandom.com': [ 'static.wikia.nocookie.net' ],
-	'inside.wf': [ 'static.wikiforge.net' ],
 	'liquipedia.net': [ 'liquipedia.net' ],
 	'paradoxwikis.com': [ 'central.paradoxwikis.com' ],
 	'shoutwiki-servers.com': [ 'www.shoutwiki.com' ],
