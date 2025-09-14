@@ -185,7 +185,7 @@ function fetchApiData( targetElement ) {
 
 function handleApiResponse( data, targetElement ) {
 	const jobs = data?.query?.statistics?.jobs;
-	if ( jobs || jobs === 0 ) {
+	if ( jobs ) {
 		const jobsElement = document.createElement( 'li' );
 		jobsElement.innerHTML = `Queued Jobs: ${ jobs }`;
 		targetElement.appendChild( jobsElement );
