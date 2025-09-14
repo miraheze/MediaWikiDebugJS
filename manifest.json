@@ -3,7 +3,7 @@
 	"name": "MediaWikiDebugJS",
 	"description": "Injects JS for debugging purposes for MediaWiki Wiki Farms",
 	"author": "Universal Omega",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"icons": {
 		"512": "logo.png"
 	},
@@ -13,10 +13,8 @@
 	},
 	"content_scripts": [
 		{
-			"matches": [
-				"<all_urls>"
-			],
-			"js": ["content_script.js"]
+			"matches": [ "<all_urls>" ],
+			"js": [ "content_script.js" ]
 		}
 	],
 	"permissions": [
@@ -25,7 +23,11 @@
 		"tabs",
 		"webNavigation"
 	],
-	"host_permissions": [
-		"<all_urls>"
-	]
+	"host_permissions": [ "<all_urls>" ],
+	"browser_specific_settings": {
+        "gecko": {
+            "id": "mediawikidebugjs@wikitide.org",
+            "strict_min_version": "115.0"
+        }
+	}
 }
