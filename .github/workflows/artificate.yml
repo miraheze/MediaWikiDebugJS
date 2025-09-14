@@ -6,9 +6,8 @@ on:
       - main
 
 jobs:
-  build-artifacts:
+  build-firefox:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -19,9 +18,9 @@ jobs:
           node-version: 24
 
       - name: Install dependencies
-        run: npm install --global web-ext crx3
+        run: npm install --global web-ext
 
-      - name: Build Firefox XPI (unsigned)
+      - name: Build Firefox XPI
         run: |
           mkdir -p dist/firefox
           web-ext build --overwrite-dest --artifacts-dir=dist/firefox
@@ -29,7 +28,27 @@ jobs:
             mv "$f" "${f%.zip}.xpi"
           done
 
-      - name: Build Chrome CRX and ZIP
+      - name: Upload Firefox Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: firefox-artifacts
+          path: dist/firefox/*.xpi
+
+  build-chrome:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm install --global web-ext
+
+      - name: Build Chrome ZIP
         run: |
           mkdir -p dist/chrome
           rsync -a --exclude 'dist' ./ dist/chrome/
@@ -37,17 +56,9 @@ jobs:
           jq 'del(.browser_specific_settings)' dist/chrome/manifest.json > dist/chrome/manifest.tmp.json
           mv dist/chrome/manifest.tmp.json dist/chrome/manifest.json
           web-ext build --source-dir=dist/chrome --overwrite-dest --artifacts-dir=dist/chrome
-          # Write secret key to file (optional, could skip if not signing)
-          echo "${{ secrets.CRX_KEY }}" > dist/chrome/key.pem
-          VERSION=$(jq -r '.version' dist/chrome/manifest.json)
-          crx3 pack dist/chrome --output dist/chrome/mediawikidebugjs-$VERSION.crx --key dist/chrome/key.pem
-          mv web-extension.crx dist/chrome/mediawikidebugjs-$VERSION.crx
 
-      - name: Upload Artifacts
+      - name: Upload Chrome Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: extension-artifacts
-          path: |
-            dist/firefox/*.xpi
-            dist/chrome/*.crx
-            dist/chrome/*.zip
+          name: chrome-artifacts
+          path: dist/chrome/*.zip
