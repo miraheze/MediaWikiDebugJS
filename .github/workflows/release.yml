@@ -79,7 +79,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION=$(jq -r '.version' manifest.json)
-          REPO=$(basename $GITHUB_REPOSITORY)
           TAG="v$VERSION"
 
           if gh release view "$TAG" >/dev/null 2>&1; then
@@ -99,6 +98,6 @@ jobs:
 
             gh release create "$TAG" \
               $FILES \
-              --title "$REPO $VERSION" \
-              --notes "Automated release of $REPO version $VERSION for Firefox (unsigned + signed if available) and Chrome."
+              --title "$EXT_NAME $VERSION" \
+              --notes "Automated release of $EXT_NAME version $VERSION for Firefox (unsigned + signed if available) and Chrome."
           fi
