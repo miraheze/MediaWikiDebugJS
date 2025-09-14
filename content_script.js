@@ -132,8 +132,12 @@ function checkHtml() {
 			( dbname || server || servedBy ) ? ` via ${ dbname }${ server ? `@${ server }` : '' }${ servedBy ? ` / ${ servedBy }` : '' }` : ''
 		})`;
 
-		// eslint-disable-next-line security/detect-unsafe-regex
-		const skin = [ ...document.body.className.matchAll( /skin-([a-z]+(?:-[0-9]+)?)/g ) ].map( ( match ) => match[ 1 ] );
+		const skin = [
+			...new Set(
+				[ ...document.body.className.matchAll( /skin-([a-z]+(?:-[0-9]+)?)/g ) ].map( match => match[1] )
+			)
+		];
+
 		const skinName = skin[ 1 ] || skin[ 0 ] || '';
 		const skinSelector = SKIN_SELECTORS[ skinName ] || SKIN_SELECTORS.default;
 
