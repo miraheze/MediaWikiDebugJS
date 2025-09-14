@@ -31,6 +31,7 @@ const cache = {};
 function getMediaWikiVariable( variable ) {
 	const scriptNodes = [ ...document.querySelectorAll( 'script' ) ];
 	for ( const node of scriptNodes ) {
+		// eslint-disable-next-line security/detect-non-literal-regexp
 		const match = new RegExp( `"${ variable }":\\s*"?([^("|}|,)]+)"?` ).exec( node.innerText );
 		if ( match ) {
 			return match[ 1 ];
@@ -100,8 +101,10 @@ function checkHtml() {
 	const footerContent = document.querySelector( 'footer' )?.innerHTML || '';
 	const contentToCheck = headContent + footerContent;
 
-	const matchingWikiFarms = Object.entries( WIKI_FARMS ).filter( ( [ , selectors ] ) => selectors.some( ( selector ) => contentToCheck.includes( selector ) )
-	);
+	const matchingWikiFarms = Object.entries( WIKI_FARMS )
+		.filter( ( [ , selectors ] ) =>
+			selectors.some( ( selector ) => contentToCheck.includes( selector ) )
+		);
 
 	if ( !matchingWikiFarms.length ) {
 		return;
@@ -116,9 +119,11 @@ function checkHtml() {
 		const responseTime = getMediaWikiVariable( 'wgBackendResponseTime' ) || await getBackendResponseTime();
 		const backendVersion = headers[ 'x-powered-by' ]?.replace( /^PHP\/([0-9]+).*/, '$1' ) || 'PHP';
 		const server = getMediaWikiVariable( 'wgHostname' )?.replace(
+			// eslint-disable-next-line security/detect-non-literal-regexp
 			new RegExp( '.' + matchingWikiFarms[ 0 ][ 0 ].replace( /\./g, '\\.' ) + '$' ), ''
 		) || '';
 		const servedBy = getXservedBy( headers ).replace(
+			// eslint-disable-next-line security/detect-non-literal-regexp
 			new RegExp( `.${ matchingWikiFarms.map( ( [ farm ] ) => farm ).join( '|' ) }|cache-(yvr|den|bfi-krnt|lcy-eglc)|^mw[0-9]+|^test[0-9]+|\\s`, 'g' ),
 			''
 		).replace( /\.$/, '' );
@@ -128,6 +133,7 @@ function checkHtml() {
 			( dbname || server || servedBy ) ? ` via ${ dbname }${ server ? `@${ server }` : '' }${ servedBy ? ` / ${ servedBy }` : '' }` : ''
 		})`;
 
+		// eslint-disable-next-line security/detect-unsafe-regex
 		const skin = [ ...document.body.className.matchAll( /skin-([a-z]+(?:-[0-9]+)?)/g ) ].map( ( match ) => match[ 1 ] );
 		const skinName = skin[ 1 ] || skin[ 0 ] || '';
 		const skinSelector = SKIN_SELECTORS[ skinName ] || SKIN_SELECTORS.default;
