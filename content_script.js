@@ -173,13 +173,13 @@ function fetchApiData( targetElement ) {
 			handleApiResponse( data, targetElement );
 		} )
 		.catch( () => {
-			console.warn( `Trying fallback URL: ${ fallbackApiUrl }` );
+			console.debug( `Trying fallback URL: ${ fallbackApiUrl }` );
 			fetchData( fallbackApiUrl )
 				.then( ( fallbackData ) => {
 					cache[ apiUrl ] = { data: fallbackData, timestamp: Date.now() };
 					handleApiResponse( fallbackData, targetElement );
 				} )
-				.catch( () => console.error( 'Error fetching data from fallback API URL.' ) );
+				.catch( () => console.info( 'Error fetching data from fallback API URL.' ) );
 		} );
 }
 
