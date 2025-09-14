@@ -27,7 +27,8 @@
 	"browser_specific_settings": {
         "gecko": {
             "id": "mediawikidebugjs@wikitide.org",
-            "strict_min_version": "115.0"
+            "strict_min_version": "115.0",
+			"update_url": "https://raw.githubusercontent.com/miraheze/MediaWikiDebugJS/refs/heads/main/update.json"
         }
 	}
 }
