@@ -1,0 +1,12 @@
+{
+  "addons": {
+    "mediawikidebug@wikitide.org": {
+      "updates": [
+        {
+          "version": "mediawikidebugjs@wikitide.org",
+          "update_link": "https://github.com/miraheze/MediaWikiDebugJS/releases/download/v1.1.0/mediawikidebugjs-1.1.0.xpi"
+        }
+      ]
+    }
+  }
+}
