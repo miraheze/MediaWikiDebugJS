@@ -212,5 +212,5 @@ function fetchData( url ) {
 		} );
 }
 
-window.addEventListener( 'load', checkHtml );
+window.onload = checkHtml();
 document.addEventListener( 'DOMContentLoaded', checkHtml );
