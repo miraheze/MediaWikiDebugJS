@@ -101,10 +101,9 @@ function checkHtml() {
 	const footerContent = document.querySelector( 'footer' )?.innerHTML || '';
 	const contentToCheck = headContent + footerContent;
 
-	const matchingWikiFarms = Object.entries( WIKI_FARMS )
-		.filter( ( [ , selectors ] ) =>
-			selectors.some( ( selector ) => contentToCheck.includes( selector ) )
-		);
+	const matchingWikiFarms = Object.entries( WIKI_FARMS ).filter(
+		( [ , selectors ] ) => selectors.some( ( selector ) => contentToCheck.includes( selector ) )
+	);
 
 	if ( !matchingWikiFarms.length ) {
 		return;
