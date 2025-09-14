@@ -3,7 +3,7 @@
 	"name": "MediaWikiDebugJS",
 	"description": "Injects JS for debugging purposes for MediaWiki Wiki Farms",
 	"author": "Universal Omega",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"icons": {
 		"512": "logo.png"
 	},
@@ -28,7 +28,7 @@
         "gecko": {
             "id": "mediawikidebugjs@wikitide.org",
             "strict_min_version": "115.0",
-			"update_url": "https://raw.githubusercontent.com/miraheze/MediaWikiDebugJS/refs/heads/main/update.json"
+            "update_url": "https://raw.githubusercontent.com/miraheze/MediaWikiDebugJS/refs/heads/main/update.json"
         }
 	}
 }

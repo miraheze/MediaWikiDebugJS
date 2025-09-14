@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: npm install --global web-ext crx3
 
-      - name: Build Firefox XPI (normal)
+      - name: Build Firefox XPI (unsigned)
         run: |
           mkdir -p dist/firefox
           web-ext build --overwrite-dest --artifacts-dir=dist/firefox
@@ -29,16 +29,29 @@ jobs:
             mv "$f" "${f%.zip}.xpi"
           done
 
-      - name: Build Firefox XPI (no update_url)
+      - name: Build & Sign Firefox XPI
+        env:
+          WEB_EXT_API_KEY: ${{ secrets.AMO_JWT_ISSUER }}
+          WEB_EXT_API_SECRET: ${{ secrets.AMO_JWT_SECRET }}
         run: |
-          mkdir -p dist/firefox-noupdate
-          rsync -a --exclude 'dist' ./ dist/firefox-noupdate/
-          jq 'del(.browser_specific_settings.gecko.update_url)' dist/firefox-noupdate/manifest.json > dist/firefox-noupdate/manifest.tmp.json
-          mv dist/firefox-noupdate/manifest.tmp.json dist/firefox-noupdate/manifest.json
-          web-ext build --source-dir=dist/firefox-noupdate --overwrite-dest --artifacts-dir=dist/firefox-noupdate
-          for f in dist/firefox-noupdate/*.zip; do
-            mv "$f" "${f%.zip}-noupdate.xpi"
-          done
+          mkdir -p dist/firefox-signed
+          set +e
+          web-ext sign \
+            --source-dir=. \
+            --artifacts-dir=dist/firefox-signed \
+            --channel=unlisted
+          STATUS=$?
+          set -e
+
+          if [ $STATUS -ne 0 ]; then
+            echo "Signing failed, probably version already exists. Skipping signed XPI."
+            rm -f dist/firefox-signed/*.xpi
+          else
+            # Rename signed XPI to include "-signed"
+            for f in dist/firefox-signed/*.xpi; do
+              mv "$f" "${f%.xpi}-signed.xpi"
+            done
+          fi
 
       - name: Build Chrome CRX and ZIP
         run: |
@@ -62,15 +75,23 @@ jobs:
           REPO=$(basename $GITHUB_REPOSITORY)
           TAG="v$VERSION"
 
-          # Check if the tag already exists
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "Release $TAG already exists, skipping release."
           else
+            FILES="dist/firefox/*.xpi"
+
+            # Add signed XPI if it exists
+            shopt -s nullglob
+            SIGNED=(dist/firefox-signed/*.xpi)
+            if [ ${#SIGNED[@]} -ne 0 ]; then
+              FILES="$FILES ${SIGNED[@]}"
+            fi
+            shopt -u nullglob
+
+            FILES="$FILES dist/chrome/*.crx dist/chrome/*.zip"
+
             gh release create "$TAG" \
-              dist/firefox/*.xpi \
-              dist/firefox-noupdate/*.xpi \
-              dist/chrome/*.crx \
-              dist/chrome/*.zip \
+              $FILES \
               --title "$REPO $VERSION" \
-              --notes "Automated release of $REPO version $VERSION for Firefox and Chrome."
+              --notes "Automated release of $REPO version $VERSION for Firefox (unsigned + signed if available) and Chrome."
           fi
