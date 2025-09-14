@@ -1,16 +1,16 @@
 {
-  "addons": {
-    "mediawikidebugjs@wikitide.org": {
-      "updates": [
-        {
-          "version": "1.1.0",
-          "update_link": "https://github.com/miraheze/MediaWikiDebugJS/releases/download/v1.1.0/mediawikidebugjs-1.1.0.xpi"
-        },
-        {
-          "version": "1.2.0",
-          "update_link": "https://github.com/miraheze/MediaWikiDebugJS/releases/download/v1.2.0/mediawikidebugjs-1.2.0.xpi"
-        }
-      ]
-    }
-  }
+	"addons": {
+		"mediawikidebugjs@wikitide.org": {
+			"updates": [
+				{
+					"version": "1.1.0",
+					"update_link": "https://github.com/miraheze/MediaWikiDebugJS/releases/download/v1.1.0/mediawikidebugjs-1.1.0.xpi"
+				},
+				{
+					"version": "1.2.0",
+					"update_link": "https://github.com/miraheze/MediaWikiDebugJS/releases/download/v1.2.0/mediawikidebugjs-1.2.0.xpi"
+				}
+			]
+		}
+	}
 }
