@@ -9,6 +9,10 @@
 				{
 					"version": "1.2.0",
 					"update_link": "https://github.com/miraheze/MediaWikiDebugJS/releases/download/v1.2.0/mediawikidebugjs-1.2.0.xpi"
+				},
+				{
+					"version": "1.3.0",
+					"update_link": "https://github.com/miraheze/MediaWikiDebugJS/releases/download/v1.3.0/mediawikidebugjs-1.3.0.xpi"
 				}
 			]
 		}
