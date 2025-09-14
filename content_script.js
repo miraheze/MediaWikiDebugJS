@@ -134,7 +134,8 @@ function checkHtml() {
 
 		const skin = [
 			...new Set(
-				[ ...document.body.className.matchAll( /skin-([a-z]+(?:-[0-9]+)?)/g ) ].map( match => match[1] )
+				// eslint-disable-next-line security/detect-unsafe-regex
+				[ ...document.body.className.matchAll( /skin-([a-z]+(?:-[0-9]+)?)/g ) ].map( match => match[ 1 ] )
 			)
 		];
 
