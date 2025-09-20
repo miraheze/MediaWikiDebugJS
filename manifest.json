@@ -3,11 +3,12 @@
 	"name": "MediaWikiDebugJS",
 	"description": "Injects JS for debugging purposes for MediaWiki Wiki Farms",
 	"author": "Universal Omega",
-	"version": "1.5.0",
+	"version": "1.6.0",
 	"icons": {
-		"512": "logo.png"
+		"512": "images/icon-512.png"
 	},
 	"action": {
+		"default_icon": "images/icon-128.png",
 		"default_title": "MediaWikiDebugJS",
 		"default_popup": "popup.html"
 	},
