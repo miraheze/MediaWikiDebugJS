@@ -6,6 +6,6 @@
 		"lint:js": "eslint --cache --max-warnings 0 ."
 	},
 	"devDependencies": {
-		"eslint-config-wikimedia": "0.31.0"
+		"eslint-config-wikimedia": "0.32.1"
 	}
 }
