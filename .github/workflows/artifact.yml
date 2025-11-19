@@ -31,7 +31,7 @@ jobs:
           mv dist/firefox/*.zip dist/firefox/$EXT_NAME-$VERSION.xpi
 
       - name: Upload Firefox Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: firefox-artifacts
           path: dist/firefox/*.xpi
@@ -63,7 +63,7 @@ jobs:
           mv dist/chrome/*.zip dist/chrome/$EXT_NAME-$VERSION.zip
 
       - name: Upload Chrome Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: chrome-artifacts
           path: dist/chrome/*.zip
