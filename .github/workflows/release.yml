@@ -26,8 +26,12 @@ jobs:
       - name: Build Firefox XPI (unsigned)
         run: |
           mkdir -p dist/firefox
-          web-ext build --overwrite-dest --artifacts-dir=dist/firefox
-          VERSION=$(jq -r '.version' manifest.json)
+          rsync -a --exclude 'dist' ./ dist/firefox/
+          # Remove background.service_worker (not supported in Firefox)
+          jq 'del(.background.service_worker)' dist/firefox/manifest.json > dist/firefox/manifest.tmp.json
+          mv dist/firefox/manifest.tmp.json dist/firefox/manifest.json
+          web-ext build --source-dir=dist/firefox --overwrite-dest --artifacts-dir=dist/firefox
+          VERSION=$(jq -r '.version' dist/firefox/manifest.json)
           mv dist/firefox/*.zip dist/firefox/$EXT_NAME-$VERSION.xpi
 
       - name: Build & Sign Firefox XPI
@@ -36,11 +40,18 @@ jobs:
           WEB_EXT_API_SECRET: ${{ secrets.AMO_JWT_SECRET }}
         run: |
           mkdir -p dist/firefox-signed
+          # Prepare signed source with service_worker removed
+          mkdir -p dist/firefox-sign-source
+          rsync -a --exclude 'dist' ./ dist/firefox-sign-source/
+          jq 'del(.background.service_worker)' dist/firefox-sign-source/manifest.json > dist/firefox-sign-source/manifest.tmp.json
+          mv dist/firefox-sign-source/manifest.tmp.json dist/firefox-sign-source/manifest.json
+
           set +e
           web-ext sign \
-            --source-dir=. \
+            --source-dir=dist/firefox-sign-source \
             --artifacts-dir=dist/firefox-signed \
-            --channel=unlisted
+            --amo-metadata=dist/firefox-sign-source/amo-metadata.json \
+            --channel=listed
           STATUS=$?
           set -e
 
@@ -57,8 +68,8 @@ jobs:
         run: |
           mkdir -p dist/chrome
           rsync -a --exclude 'dist' ./ dist/chrome/
-          # Remove Firefox-specific field from manifest
-          jq 'del(.browser_specific_settings)' dist/chrome/manifest.json > dist/chrome/manifest.tmp.json
+          # Remove Firefox-specific fields from manifest
+          jq 'del(.background.scripts, .browser_specific_settings)' dist/chrome/manifest.json > dist/chrome/manifest.tmp.json
           mv dist/chrome/manifest.tmp.json dist/chrome/manifest.json
           VERSION=$(jq -r '.version' dist/chrome/manifest.json)
 
