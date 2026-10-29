@@ -26,13 +26,8 @@ jobs:
       - name: Build Firefox XPI (unsigned)
         run: |
           mkdir -p dist/firefox
-          rsync -a --exclude 'dist' ./ dist/firefox/
-          # Remove background.service_worker (not supported in Firefox)
-          jq 'del(.background.service_worker)' dist/firefox/manifest.json > dist/firefox/manifest.tmp.json
-          mv dist/firefox/manifest.tmp.json dist/firefox/manifest.json
-          web-ext build --source-dir=dist/firefox --overwrite-dest --artifacts-dir=dist/firefox
-          VERSION=$(jq -r '.version' dist/firefox/manifest.json)
-          mv dist/firefox/*.zip dist/firefox/$EXT_NAME-$VERSION.xpi
+          web-ext build --overwrite-dest --artifacts-dir=dist/firefox
+          VERSION=$(jq -r '.version' manifest.json)
 
       - name: Build & Sign Firefox XPI
         env:
