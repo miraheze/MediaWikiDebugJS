@@ -28,6 +28,7 @@ jobs:
           mkdir -p dist/firefox
           web-ext build --overwrite-dest --artifacts-dir=dist/firefox
           VERSION=$(jq -r '.version' manifest.json)
+          mv dist/firefox/*.zip dist/firefox/$EXT_NAME-$VERSION.xpi
 
       - name: Build & Sign Firefox XPI
         env:
@@ -35,11 +36,6 @@ jobs:
           WEB_EXT_API_SECRET: ${{ secrets.AMO_JWT_SECRET }}
         run: |
           mkdir -p dist/firefox-signed
-          # Prepare signed source with service_worker removed
-          mkdir -p dist/firefox-sign-source
-          rsync -a --exclude 'dist' ./ dist/firefox-sign-source/
-          jq 'del(.background.service_worker)' dist/firefox-sign-source/manifest.json > dist/firefox-sign-source/manifest.tmp.json
-          mv dist/firefox-sign-source/manifest.tmp.json dist/firefox-sign-source/manifest.json
 
           set +e
           web-ext sign \
