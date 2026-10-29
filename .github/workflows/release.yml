@@ -36,10 +36,9 @@ jobs:
           WEB_EXT_API_SECRET: ${{ secrets.AMO_JWT_SECRET }}
         run: |
           mkdir -p dist/firefox-signed
-
           set +e
           web-ext sign \
-            --source-dir=dist/firefox-sign-source \
+            --source-dir=. \
             --artifacts-dir=dist/firefox-signed \
             --amo-metadata=dist/firefox-sign-source/amo-metadata.json \
             --channel=listed
