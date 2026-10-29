@@ -1,0 +1,11 @@
+{
+	"summary": {
+		"en-US": "Injects JS for debugging purposes for MediaWiki wiki farms."
+	},
+	"categories": [
+		"other"
+	],
+	"version": {
+		"license": "Apache-2.0"
+	}
+}

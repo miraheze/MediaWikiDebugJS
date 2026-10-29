@@ -1,9 +1,10 @@
 {
 	"manifest_version": 3,
 	"name": "MediaWikiDebugJS",
-	"description": "Injects JS for debugging purposes for MediaWiki Wiki Farms",
+	"description": "Injects JS for debugging purposes for MediaWiki wiki farms.",
 	"author": "Universal Omega",
-	"version": "1.6.0",
+	"license": "Apache-2.0",
+	"version": "1.7.0",
 	"icons": {
 		"512": "images/icon-512.png"
 	},
@@ -28,8 +29,12 @@
 	"browser_specific_settings": {
 		"gecko": {
 			"id": "mediawikidebugjs@wikitide.org",
-			"strict_min_version": "115.0",
-			"update_url": "https://raw.githubusercontent.com/miraheze/MediaWikiDebugJS/refs/heads/main/update.json"
+			"strict_min_version": "142.0",
+			"data_collection_permissions": {
+				"required": [
+					"none"
+				]
+			}
 		}
 	}
 }
