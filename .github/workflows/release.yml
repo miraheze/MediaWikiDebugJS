@@ -58,8 +58,8 @@ jobs:
         run: |
           mkdir -p dist/chrome
           rsync -a --exclude 'dist' ./ dist/chrome/
-          # Remove Firefox-specific fields from manifest
-          jq 'del(.background.scripts, .browser_specific_settings)' dist/chrome/manifest.json > dist/chrome/manifest.tmp.json
+          # Remove Firefox-specific field from manifest
+          jq 'del(.browser_specific_settings)' dist/chrome/manifest.json > dist/chrome/manifest.tmp.json
           mv dist/chrome/manifest.tmp.json dist/chrome/manifest.json
           VERSION=$(jq -r '.version' dist/chrome/manifest.json)
 
