@@ -4,7 +4,7 @@
 	"description": "Injects JS for debugging purposes for MediaWiki wiki farms.",
 	"author": "Universal Omega",
 	"license": "Apache-2.0",
-	"version": "1.7.1",
+	"version": "1.7.2",
 	"icons": {
 		"512": "images/icon-512.png"
 	},
