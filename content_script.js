@@ -129,9 +129,9 @@ function checkHtml() {
 		).replace( /\.$/, '' );
 		const dbname = getDBName() || '';
 
-		const info = `${ responseTime }ms (<b>${ backendVersion }</b>${
-			( dbname || server || servedBy ) ? ` via ${ dbname }${ server ? `@${ server }` : '' }${ servedBy ? ` / ${ servedBy }` : '' }` : ''
-		})`;
+		const via = ( dbname || server || servedBy ) ?
+			` via ${ dbname }${ server ? `@${ server }` : '' }${ servedBy ? ` / ${ servedBy }` : '' }` :
+			'';
 
 		const skin = [
 			...new Set(
@@ -148,8 +148,11 @@ function checkHtml() {
 			return;
 		}
 
+		const versionElement = document.createElement( 'b' );
+		versionElement.textContent = backendVersion;
+
 		const infoElement = document.createElement( 'li' );
-		infoElement.innerHTML = info;
+		infoElement.append( `${ responseTime }ms (`, versionElement, `${ via })` );
 		targetElement.appendChild( infoElement );
 
 		fetchApiData( targetElement );
@@ -187,7 +190,7 @@ function handleApiResponse( data, targetElement ) {
 	const jobs = data?.query?.statistics?.jobs;
 	if ( jobs ) {
 		const jobsElement = document.createElement( 'li' );
-		jobsElement.innerHTML = `Queued Jobs: ${ jobs }`;
+		jobsElement.textContent = `Queued Jobs: ${ jobs }`;
 		targetElement.appendChild( jobsElement );
 	}
 }
