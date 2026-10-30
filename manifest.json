@@ -4,7 +4,7 @@
 	"description": "Injects JS for debugging purposes for MediaWiki wiki farms.",
 	"author": "Universal Omega",
 	"license": "Apache-2.0",
-	"version": "1.7.2",
+	"version": "1.7.3",
 	"icons": {
 		"512": "images/icon-512.png"
 	},
@@ -19,13 +19,6 @@
 			"js": [ "content_script.js" ]
 		}
 	],
-	"permissions": [
-		"activeTab",
-		"scripting",
-		"tabs",
-		"webNavigation"
-	],
-	"host_permissions": [ "<all_urls>" ],
 	"browser_specific_settings": {
 		"gecko": {
 			"id": "mediawikidebugjs@wikitide.org",
