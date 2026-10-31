@@ -14,6 +14,9 @@
 	"support_email": {
 		"en-US": "browser-extensions@wikitide.org"
 	},
+	"support_url": {
+		"en-US": "https://issue-tracker.miraheze.org"
+	},
 	"contributions_url": "https://github.com/sponsors/miraheze",
 	"default_locale": "en-US",
 	"categories": {
