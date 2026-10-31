@@ -1,11 +1,33 @@
 {
-	"summary": {
-		"en-US": "Injects JS for debugging purposes for MediaWiki wiki farms."
+	"name": {
+		"en-US": "MediaWikiDebugJS"
 	},
-	"categories": [
-		"other"
-	],
+	"slug": "mediawikidebugjs",
+	"summary": {
+		"en-US": "Shows backend response time, database name, server and queued jobs on MediaWiki wiki farm pages."
+	},
+	"description": {
+		"en-US": "MediaWikiDebugJS shows backend debugging details directly on MediaWiki pages.\n\nWhen you visit a page on a recognized wiki farm, the extension adds a few lines near the page footer or user menu, depending on the skin:\n• Backend response time\n• Database name\n• Server and CDN host that served the page\n• Number of queued jobs on the wiki\n\nMediaWiki is a trademark of the Wikimedia Foundation. This extension is not affiliated with or endorsed by the Wikimedia Foundation."
+	},
+	"categories": {
+		"firefox": [
+			"other"
+		]
+	},
+	"contributions_url": "https://github.com/sponsors/miraheze",
+	"default_locale": "en-US",
+	"homepage": {
+		"en-US": "https://github.com/miraheze/MediaWikiDebugJS"
+	},
+	"support_email": {
+		"en-US": "browser-extensions@wikitide.org"
+	},
+	"support_url": {
+		"en-US": "https://issue-tracker.miraheze.org"
+	},
 	"version": {
+		"approval_notes": "No build step is needed to review this. The source in the repository is the extension as shipped, with no bundling or minification. content_script.js runs on all URLs because wiki farms use custom domains, and it exits immediately unless document.body has the mediawiki class and the page head or footer matches a known wiki farm host. It then sends a HEAD request to the current page and a request to the same site's api.php for statistics, and shows the results using textContent (no innerHTML). It requests no extension permissions, loads no remote code, and collects no data.",
+		"compatibility": [ "android", "firefox" ],
 		"license": "Apache-2.0"
 	}
 }
