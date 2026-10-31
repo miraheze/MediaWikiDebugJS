@@ -23,6 +23,7 @@
 	},
 	"version": {
 		"license": "Apache-2.0",
+		"compatibility": [ "android", "firefox" ],
 		"approval_notes": "No build step is needed to review this. The source in the repository is the extension as shipped, with no bundling or minification. content_script.js runs on all URLs because wiki farms use custom domains, and it exits immediately unless document.body has the mediawiki class and the page head or footer matches a known wiki farm host. It then sends a HEAD request to the current page and a request to the same site's api.php for statistics, and shows the results using textContent (no innerHTML). It requests no extension permissions, loads no remote code, and collects no data."
 	}
 }
